@@ -211,7 +211,7 @@ textarea.inp{height:52px;resize:vertical}
     <button class="btn btn-g" style="width:100%;justify-content:center;margin-top:16px;padding:10px" onclick="doLogin()">Log ind</button>
     <div class="login-err" id="login-err"></div>
     <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--gray-100);text-align:center">
-      <button onclick="var m=document.getElementById('config-modal');m.style.display='flex';m.classList.add('open');document.getElementById('cfg-admin-fields').style.display='block';document.getElementById('cfg-sql-section').style.display='block';document.getElementById('cfg-url').value=localStorage.getItem('fobu_sb_url')||'';document.getElementById('cfg-key').value=localStorage.getItem('fobu_sb_key')||'';document.getElementById('cfg-date').value=localStorage.getItem('fobu_ov_date')||'2026-10-01';" style="background:none;border:none;font-size:12px;color:var(--gray-400);cursor:pointer;font-family:inherit">⚙ Indstil Supabase-forbindelse</button>
+      <button onclick="prefillConfig(true);var m=document.getElementById('config-modal');m.style.display='flex';m.classList.add('open');" style="background:none;border:none;font-size:12px;color:var(--gray-400);cursor:pointer;font-family:inherit">⚙ Indstil Supabase-forbindelse</button>
     </div>
   </div>
 </div>
@@ -362,7 +362,7 @@ textarea.inp{height:52px;resize:vertical}
 <div class="modal-bg open" id="config-modal">
   <div class="modal">
     <h2>Indstillinger</h2>
-    <div id="cfg-admin-fields" style="display:none">
+    <div id="cfg-admin-fields">
     <p style="font-size:12px;color:var(--gray-600);margin-bottom:4px">Find under <strong>Settings → API Keys → Legacy anon</strong></p>
     <label class="lbl">Project URL</label>
     <input class="inp" id="cfg-url" type="text" placeholder="https://xxxxxxxx.supabase.co">
@@ -375,7 +375,7 @@ textarea.inp{height:52px;resize:vertical}
       <input type="checkbox" id="cfg-bulk-delete" style="width:16px;height:16px;cursor:pointer;accent-color:var(--red)">
       <label for="cfg-bulk-delete" style="font-size:12px;color:var(--red);font-weight:500;cursor:pointer">Tillad sletning af opgaver via bulk-opdatering</label>
     </div>
-    <div id="cfg-sql-section" style="display:none">
+    <div id="cfg-sql-section">
     <details style="margin-top:12px">
       <summary style="font-size:12px;font-weight:600;cursor:pointer;color:var(--gray-600);display:flex;align-items:center;justify-content:space-between">
         SQL-opsætning (kør én gang i Supabase SQL Editor)
@@ -792,15 +792,16 @@ function refreshOwnerDropdown(){
   });
 }
 
-function prefillConfig(){
-  const isAdmin=!CURRENT_USER||CURRENT_USER.rolle==="admin";
-  const af=document.getElementById("cfg-admin-fields");
-  const sf=document.getElementById("cfg-sql-section");
+function prefillConfig(fromLogin){
+  var isAdmin=fromLogin||!CURRENT_USER||CURRENT_USER.rolle==="admin";
+  var af=document.getElementById("cfg-admin-fields");
+  var sf=document.getElementById("cfg-sql-section");
   if(af)af.style.display=isAdmin?"block":"none";
   if(sf)sf.style.display=isAdmin?"block":"none";
-  const urlEl=document.getElementById("cfg-url"),keyEl=document.getElementById("cfg-key");
-  if(isAdmin){if(urlEl)urlEl.value=SB_URL;if(keyEl)keyEl.value=SB_KEY}
-  const dateEl=document.getElementById("cfg-date"),bdEl=document.getElementById("cfg-bulk-delete");
+  var urlEl=document.getElementById("cfg-url"),keyEl=document.getElementById("cfg-key");
+  if(isAdmin&&urlEl)urlEl.value=SB_URL;
+  if(isAdmin&&keyEl)keyEl.value=SB_KEY;
+  var dateEl=document.getElementById("cfg-date"),bdEl=document.getElementById("cfg-bulk-delete");
   if(dateEl)dateEl.value=OV_DATE;
   if(bdEl)bdEl.checked=BULK_DELETE;
 }
