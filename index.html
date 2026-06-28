@@ -1,0 +1,1570 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FOBU – Overtagelsesoverblik</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --green:#2D6A2D;--green-mid:#3A8C3A;--green-light:#EAF4EA;--green-hover:#F2F9F2;--green-badge:#C8E6C8;
+  --gray-50:#F8F9FA;--gray-100:#F1F3F0;--gray-200:#E2E6E0;--gray-400:#9BA89A;--gray-600:#5C6B5B;--gray-900:#1A2619;
+  --white:#FFFFFF;--red:#C0392B;--red-light:#FDECEA;--amber:#B7770D;--amber-light:#FEF3CD;
+  --blue:#1A5C8F;--blue-light:#E3EEF7;
+  --sidebar-w:240px;--radius:12px;--shadow:0 1px 4px rgba(0,0,0,0.07);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--gray-50);color:var(--gray-900);display:flex;height:100vh;overflow:hidden}
+.sidebar{width:var(--sidebar-w);background:var(--white);border-right:1px solid var(--gray-200);display:flex;flex-direction:column;height:100vh;overflow-y:auto;flex-shrink:0}
+.logo{padding:20px 20px 16px;border-bottom:1px solid var(--gray-200)}
+.logo-wm{font-size:24px;font-weight:700;color:var(--green);letter-spacing:-0.5px}
+.logo-sub{font-size:11px;color:var(--gray-400);margin-top:2px}
+.nav-sec{font-size:10px;color:var(--gray-400);text-transform:uppercase;letter-spacing:0.08em;padding:14px 20px 5px;font-weight:600}
+.nav-item{display:flex;align-items:center;gap:9px;padding:8px 11px;margin:2px 8px;border-radius:9px;cursor:pointer;font-size:13px;color:var(--gray-600);font-weight:500;transition:all .12s;border:none;background:none;width:calc(100% - 16px);text-align:left;font-family:inherit}
+.nav-item:hover{background:var(--gray-100);color:var(--gray-900)}
+.nav-item.active{background:var(--green-light);color:var(--green);font-weight:600}
+.nav-icon{width:17px;flex-shrink:0;font-size:14px;text-align:center}
+.nav-badge{margin-left:auto;font-size:10px;padding:1px 6px;border-radius:20px;font-weight:700}
+.nb-a{background:var(--amber-light);color:var(--amber)}.nb-r{background:var(--red-light);color:var(--red)}.nb-g{background:var(--gray-100);color:var(--gray-600)}
+.nav-bottom{margin-top:auto;border-top:1px solid var(--gray-200);padding:8px 0 12px}
+.sync-row{font-size:11px;color:var(--gray-400);padding:3px 20px 6px;display:flex;align-items:center;gap:5px}
+.sdot{width:6px;height:6px;border-radius:50%;background:var(--gray-400);flex-shrink:0}
+.sdot.ok{background:var(--green)}.sdot.err{background:var(--red)}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.topbar{background:var(--white);border-bottom:1px solid var(--gray-200);padding:0 22px;height:54px;display:flex;align-items:center;gap:8px;flex-shrink:0}
+.topbar h1{font-size:14px;font-weight:600;flex:1}
+.tbtn{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:8px;border:1.5px solid var(--gray-200);background:var(--white);color:var(--gray-900);font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;transition:all .12s;white-space:nowrap}
+.tbtn:hover{background:var(--gray-100)}
+.tbtn.g{background:var(--green);color:#fff;border-color:var(--green)}
+.tbtn.g:hover{background:var(--green-mid)}
+.content{flex:1;overflow-y:auto;padding:22px}
+.page{display:none}.page.active{display:block;animation:fadein .15s ease}
+@keyframes fadein{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:translateY(0)}}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin-bottom:16px}
+.stat-card{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow)}
+.stat-lbl{font-size:10px;color:var(--gray-400);margin-bottom:5px;text-transform:uppercase;letter-spacing:0.06em;font-weight:600}
+.stat-val{font-size:24px;font-weight:700;line-height:1}
+.stat-sub{font-size:10px;color:var(--gray-400);margin-top:2px}
+.sv-g{color:var(--green)}.sv-a{color:var(--amber)}.sv-r{color:var(--red)}
+
+/* CARD */
+.card{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius);padding:16px 18px;margin-bottom:12px;box-shadow:var(--shadow)}
+.card-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px}
+.card-title{font-size:13px;font-weight:600}
+
+/* COUNTDOWN */
+.cd-banner{display:flex;align-items:center;gap:16px;background:var(--gray-900);color:#fff;border-radius:var(--radius);padding:16px 22px;margin-bottom:16px;flex-wrap:wrap}
+.cd-days{font-size:36px;font-weight:700;line-height:1}
+.cd-sep{width:1px;height:40px;background:rgba(255,255,255,0.15);flex-shrink:0}
+.cd-pills{display:flex;gap:8px;flex-wrap:wrap}
+.cd-pill{padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600}
+.cdp-g{background:rgba(45,106,45,0.6);color:#a8d8a8}
+.cdp-a{background:rgba(183,119,13,0.5);color:#fcd975}
+.cdp-r{background:rgba(192,57,43,0.5);color:#f5a69e}
+
+/* TOOLBAR */
+.toolbar{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;align-items:center}
+.toolbar input,.toolbar select{font-size:12px;padding:5px 9px;border:1.5px solid var(--gray-200);border-radius:8px;background:var(--white);color:var(--gray-900);font-family:inherit}
+.toolbar input{flex:1;min-width:130px}
+
+/* TABLE */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{text-align:left;font-weight:600;color:var(--gray-400);padding:6px 9px;border-bottom:1px solid var(--gray-200);font-size:10px;text-transform:uppercase;letter-spacing:0.06em}
+td{padding:8px 9px;border-bottom:1px solid var(--gray-100);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr.cr:hover td{background:var(--green-hover);cursor:pointer}
+.tl1 td{background:var(--gray-50);font-weight:600;font-size:12px}
+.tl2 td{background:#fafbfa;font-size:12px}
+.tl3 td{background:var(--white);font-size:11px;color:var(--gray-700)}
+.tl-inst td{background:var(--white);font-size:11px;color:var(--gray-600)}
+.chev{display:inline-block;transition:transform .13s;font-size:10px;color:var(--gray-400);margin-right:3px;cursor:pointer;user-select:none}
+.chev.open{transform:rotate(90deg)}
+
+/* KANBAN */
+.kanban{display:flex;flex-direction:column;gap:8px}
+.k-col{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius);padding:12px 16px;box-shadow:var(--shadow)}
+.k-col-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--gray-100)}
+.k-col-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:8px}
+.k-col-title{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--gray-600)}
+.k-dot{width:7px;height:7px;border-radius:50%}
+.k-count{font-size:10px;background:var(--gray-200);color:var(--gray-600);border-radius:10px;padding:1px 6px;font-weight:700}
+.k-card{border-radius:10px;padding:12px 14px;margin-bottom:8px;cursor:pointer;position:relative;overflow:hidden;transition:transform .1s,box-shadow .1s;border:1px solid transparent}
+.k-card:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,0.1)}
+.k-card-inner{position:relative;z-index:1}
+.k-card-title{font-size:13px;font-weight:600;margin-bottom:2px}
+.k-card-sub{font-size:11px;opacity:0.7;margin-bottom:8px}
+.k-card-bar-bg{border-radius:4px;height:6px;background:rgba(255,255,255,0.3);margin-bottom:5px;overflow:hidden}
+.k-card-bar-fill{height:6px;border-radius:4px;background:rgba(255,255,255,0.8);transition:width .3s}
+.k-card-stats{display:flex;justify-content:space-between;font-size:10px;font-weight:600}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600}
+.b-g{background:var(--green-light);color:var(--green)}.b-r{background:var(--red-light);color:var(--red)}.b-a{background:var(--amber-light);color:var(--amber)}.b-gray{background:var(--gray-100);color:var(--gray-600)}
+.sp{font-size:10px;padding:1px 6px;border-radius:20px;background:var(--gray-100);color:var(--gray-600);border:1px solid var(--gray-200);white-space:nowrap}
+
+/* PROG */
+.prog-bg{background:var(--gray-200);border-radius:4px;height:4px;width:56px;display:inline-block;vertical-align:middle}
+.prog-fill{border-radius:4px;height:4px;background:var(--green)}
+
+/* ACTIVITY */
+.activity-item{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--gray-100)}
+.activity-item:last-child{border-bottom:none}
+.a-dot{width:7px;height:7px;border-radius:50%;background:var(--green-badge);margin-top:4px;flex-shrink:0}
+.a-dot.r{background:var(--red-light)}.a-dot.a{background:var(--amber-light)}.a-dot.c{background:var(--blue-light)}
+.a-body{flex:1;font-size:12px}
+.a-who{font-weight:600}
+.a-time{font-size:10px;color:var(--gray-400);margin-left:6px}
+.a-text{color:var(--gray-600);margin-top:1px}
+
+/* DEADLINE BUCKETS */
+.dl-bucket{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius);margin-bottom:12px;box-shadow:var(--shadow);overflow:hidden}
+.dl-bucket-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--gray-200)}
+.dl-row{display:flex;align-items:center;padding:9px 14px;border-bottom:1px solid var(--gray-100);gap:12px;cursor:pointer}
+.dl-row:last-child{border-bottom:none}
+.dl-row:hover{background:var(--green-hover)}
+
+/* PLANLÆGNING */
+.pl-group{border:1px solid var(--gray-200);border-radius:var(--radius);margin-bottom:12px;overflow:hidden;box-shadow:var(--shadow)}
+.pl-l1{display:flex;align-items:center;gap:8px;padding:11px 14px;background:var(--green-light);border-bottom:1px solid var(--green-badge)}
+.pl-l1-name{flex:1;font-size:13px;font-weight:600;color:var(--green)}
+.pl-l2{display:flex;align-items:center;gap:6px;padding:9px 14px 9px 28px;background:#fafbfa;border-bottom:1px solid var(--gray-100);cursor:grab}
+.pl-l2:hover{background:var(--green-hover)}
+.pl-l2.drag-over{border-top:2px solid var(--green);background:var(--green-light)}
+.pl-l2.dragging{opacity:0.4}
+.pl-l2-name{flex:1;font-size:13px;font-weight:500}
+.pl-l3{display:flex;align-items:center;gap:6px;padding:7px 14px 7px 48px;background:var(--white);border-bottom:1px solid var(--gray-100);font-size:12px;color:var(--gray-600)}
+.pl-l3:hover{background:var(--green-hover)}
+.pl-add{display:flex;align-items:center;gap:6px;padding:7px 14px;font-size:12px;color:var(--gray-400);cursor:pointer;background:var(--white);transition:all .12s}
+.pl-add:hover{color:var(--green);background:var(--green-hover)}
+.pl-add.l2{padding-left:28px}
+.pl-add.l3{padding-left:48px}
+
+/* MODALS */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.38);backdrop-filter:blur(3px);z-index:200;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:var(--white);border-radius:16px;padding:28px;width:min(540px,93vw);max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.14);position:relative}
+.modal.wide{width:min(680px,95vw)}
+.modal h2{font-size:15px;font-weight:700;margin-bottom:14px}
+.mx{position:absolute;top:13px;right:13px;background:var(--gray-100);border:none;width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:14px;color:var(--gray-600);font-family:inherit}
+.lbl{font-size:11px;color:var(--gray-600);display:block;margin-bottom:3px;margin-top:11px;font-weight:600;letter-spacing:0.02em}
+.inp{width:100%;padding:7px 11px;border:1.5px solid var(--gray-200);border-radius:8px;font-size:13px;font-family:inherit;color:var(--gray-900);background:var(--white);transition:border-color .15s}
+.inp:focus{outline:none;border-color:var(--green)}
+textarea.inp{height:52px;resize:vertical}
+.mfoot{display:flex;gap:7px;margin-top:18px;justify-content:flex-end}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:6px 13px;border-radius:8px;border:1.5px solid var(--gray-200);background:var(--white);color:var(--gray-900);font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;transition:all .12s}
+.btn:hover{background:var(--gray-100)}
+.btn-g{background:var(--green);color:#fff;border-color:var(--green)}.btn-g:hover{background:var(--green-mid)}
+.btn-sm{padding:2px 8px;font-size:11px}
+.btn-r{color:var(--red)}
+.scope-preview{background:var(--green-light);border:1px solid var(--green-badge);border-radius:7px;padding:8px 11px;margin-top:7px;font-size:12px;color:var(--green);display:none}
+
+/* COMMENTS */
+.comment-list{max-height:200px;overflow-y:auto;margin-bottom:10px}
+.comment-item{padding:8px 10px;background:var(--gray-50);border-radius:8px;margin-bottom:5px;font-size:12px}
+.comment-who{font-weight:600;font-size:11px}
+.comment-time{font-size:10px;color:var(--gray-400);margin-left:5px}
+.comment-text{color:var(--gray-600);margin-top:2px}
+.comment-row{display:flex;gap:6px;align-items:flex-end}
+.comment-row textarea{flex:1;height:40px;font-size:12px;resize:none}
+
+/* BULK BAR */
+.bulk-bar{background:var(--green-light);border:1px solid var(--green-badge);border-radius:9px;padding:9px 14px;display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:12px;color:var(--green);flex-wrap:wrap}
+
+/* TOAST */
+.toast{position:fixed;bottom:22px;right:22px;background:var(--gray-900);color:#fff;padding:9px 16px;border-radius:9px;font-size:12px;z-index:999;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.show{opacity:1}
+/* LOGIN */
+.login-screen{display:none;position:fixed;inset:0;background:var(--gray-50);z-index:999;align-items:center;justify-content:center}
+.login-screen.show{display:flex}
+.login-box{background:var(--white);border:1px solid var(--gray-200);border-radius:16px;padding:40px;width:min(420px,92vw);box-shadow:0 8px 40px rgba(0,0,0,0.08)}
+.login-logo{font-size:28px;font-weight:700;color:var(--green);margin-bottom:4px}
+.login-sub{font-size:12px;color:var(--gray-400);margin-bottom:28px}
+.login-err{background:var(--red-light);color:var(--red);padding:9px 12px;border-radius:8px;font-size:12px;margin-top:10px;display:none}
+/* USER ADMIN */
+.user-row{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--gray-100)}
+.user-row:last-child{border-bottom:none}
+.user-avatar{width:30px;height:30px;border-radius:50%;background:var(--green-light);border:1.5px solid var(--green-badge);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--green);flex-shrink:0}
+.user-info{flex:1}
+.user-name{font-size:13px;font-weight:500}
+.user-email{font-size:11px;color:var(--gray-400)}
+.role-tag{font-size:10px;padding:1px 7px;border-radius:20px;font-weight:600}
+.role-admin{background:var(--green-light);color:var(--green)}
+.role-user{background:var(--gray-100);color:var(--gray-600)}
+.inactive-tag{font-size:10px;padding:1px 7px;border-radius:20px;background:var(--red-light);color:var(--red);font-weight:600}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-screen show" id="login-screen">
+  <div class="login-box">
+    <div class="login-logo"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1358.37 506.61" style="height:36px;width:auto"><defs><linearGradient id="lg1" x1="179.31" y1="32.65" x2="401.15" y2="218.79" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#0072ff"/><stop offset=".5" stop-color="#ff4b8f"/><stop offset="1" stop-color="#ff7b24"/></linearGradient><linearGradient id="lg2" x1="5.34" y1="155.57" x2="363.79" y2="456.35" xlink:href="#lg1"/></defs><path fill="url(#lg1)" d="M394.68,70.38c-.64-.54-1.34-1.03-2.11-1.44L265.52,1.37c-1.91-1.01-3.97-1.44-5.99-1.36-2.33-.12-4.71.44-6.83,1.76-18.48,11.53-36.96,23.05-55.44,34.58-.33.14-.66.3-.98.5l-42.05,26.25c-1.29.81-2.25,1.95-2.82,3.26-.03.05-.07.1-.1.16h0c-1.9,3.57-.52,8.05,3.05,9.95l42.68,22.65c.34.18.7.33,1.05.45,5.4,2.87,10.81,5.75,16.21,8.62,4.45,2.4,11.27,6.09,20.47,11.05.67.36,1.03.55,1.07.57,16.81,9.06,29.19,15.84,34.07,18.36.87.45,3.03,1.57,4.63,3.94,2.11,3.13,1.99,6.35,1.91,7.36.03,1.37.06,2.75.09,4.12v77.43c-.09.58-.15,1.17-.15,1.78v18.49s0,.09,0,.13c-.05,4.16,2.07,8.23,5.91,10.45l19.43,11.22c3.4,1.96,7.4,2.02,10.75.53.71-.24,1.41-.53,2.08-.92l78.25-45.18c1.05-.61,1.98-1.36,2.76-2.21,1.27-1.23,2.26-2.74,2.88-4.43.86-1.64,1.36-3.5,1.36-5.48V80.13c0-4.03-2.05-7.61-5.15-9.75Z"/><path fill="url(#lg2)" d="M370.94,438.94v-3.73c.07-1.23.05-2.24.04-2.94-.01-1.3-.04-2.58-.04-3.88v-26.65c.01-.35.04-.71.05-1.06v-58.84c.03-.64-.01-1.62-.32-2.73-.8-2.88-2.9-4.58-4.71-6.05-1.02-.82-2.53-1.9-4.6-2.85-.95-.56-1.83-.98-2.53-1.28-21.59-11.64-43.17-23.29-64.75-34.93-12.13-6.63-24.25-13.26-36.38-19.89-.18-.14-.39-.32-.62-.52-2.83-2.17-4.68-5.57-4.68-9.4,0-8.22,0-92.06,0-92.58,0-5.76,0-5.51,0-5.81.04-1.75.11-3.02,0-4.91-.08-1.43-.24-2.6-.36-3.39-.06-.28-.15-.66-.29-1.1-.18-.55-.52-1.49-1.16-2.54-.27-.44-.64-1-1.15-1.59-.22-.26-.53-.6-.93-.97-.3-.27-.72-.61-1.47-1.1-.68-.43-1.03-.6-2.65-1.46-.6-.31-1.19-.63-1.79-.95-.86-.46-1.73-.92-2.59-1.38-.02-.01-110.83-58.94-111.88-59.5-.43-.23-1.03-.52-1.77-.76-1.33-.45-2.71-.64-4.07-.6-2.17-.02-4.37.54-6.34,1.77l-94.78,59.11c-.66.4-1.32.79-1.98,1.18-.82.49-1.57.99-2.3,1.49l-11.21,6.99c-2.93,1.83-4.77,4.75-5.36,7.92-.2.85-.31,1.74-.31,2.65v187.05c0,.09.01.17.01.26.04,4.06,2.15,8.01,5.9,10.18l244.03,140.89c1.92,1.11,4.03,1.6,6.1,1.56.08,0,.17,0,.25,0,.05,0,.1,0,.15,0,.06,0,.12-.01.19-.01,1.75-.01,3.52-.4,5.18-1.23l102.56-51.24c4.26-2.13,6.67-6.52,6.53-11,.05-.43.09-.87.09-1.31,0-.56-.04-1.14-.13-1.7.05-.39.07-.78.07-1.18ZM219.97,379.71c-3.12,5.72-10.35,7.84-16.06,4.72l-84.83-46.34c-2.22-1.22-3.89-3.07-4.94-5.19-.03-.05-.05-.12-.08-.17-.15-.31-.28-.62-.39-.94-.67-1.74-.95-3.61-.72-5.47-.05-.44-.08-.88-.08-1.34v-103.97c0-3.97,2.06-7.48,5.15-9.54.47-.33.95-.66,1.47-.92l35.01-18.14c5.78-3,12.97-.71,15.97,5.07,3,5.78.71,12.97-5.07,15.97-.17.08-12.14,6.29-12.26,6.36-1.82.94-5.57,2.88-6.4,3.31-.59.31-2.15,1-4.12,2.14-2.02,1.15-2.66,1.7-3.08,2.07-.47.43-1.53,1.49-2.42,3.16-.72,1.35-1.03,2.56-1.18,3.23-.23,1.07-.19,1.63-.17,5.21v68.52c0,1.43-.04,2.76,0,4.68.01.45.01.84.03,1.18,0,.12,0,.23.01.33-.01.03-.01.07,0,.09v.03c0,.12.01.23.01.33.23,3.4,1.9,6.65,4.75,8.75.44.33.91.63,1.41.9l39.77,21.59,33.52,18.31c5.72,3.13,7.84,10.36,4.71,16.08Z"/><path fill="#1d2d44" d="M548.16,130.15h62.81l79.46,239.42h-51.01l-15.27-48.58h-91.26l-15.27,48.58h-48.93l79.46-239.42ZM609.93,275.88l-24.64-78.07c-2.43-7.63-10.76-7.63-13.19,0l-24.64,78.07h62.46Z"/><path fill="#1d2d44" d="M705.69,333.48l35.39-21.17c9.37,15.61,24.29,24.29,45.46,24.29,23.94,0,31.92-9.37,31.92-18.04,0-11.8-8.67-15.27-24.98-17.7l-24.64-3.82c-32.96-5.2-58.99-19.08-58.99-51.7s28.8-58.29,74.6-58.29c36.43,0,63.5,14.92,75.3,39.21l-35.39,21.17c-9.72-16.66-26.02-22.21-40.25-22.21-21.51,0-29.15,7.63-29.15,17.35,0,10.41,7.98,12.84,26.02,15.96l22.9,3.82c32.96,5.55,59.68,17.35,59.68,52.74s-32.62,59.68-77.38,59.68c-38.86,0-66.97-14.92-80.5-41.29Z"/><path fill="#1d2d44" d="M892.37,192.26h43.03v26.72c9.37-17.7,26.37-30.88,56.56-30.88,49.27,0,82.58,37.48,82.58,92.99s-33.31,92.65-82.58,92.65c-27.41,0-44.41-11.45-53.78-26.02v83.97h-45.8v-239.42ZM1028.73,281.09c0-31.92-18.04-51.35-46.5-51.35s-46.15,19.78-46.15,51.35,18.04,51.01,46.15,51.01,46.5-19.43,46.5-51.01Z"/><path fill="#1d2d44" d="M1100.21,144.72c0-14.92,12.84-27.07,27.76-27.07s27.41,12.14,27.41,27.07-12.84,27.06-27.41,27.06-27.76-12.14-27.76-27.06ZM1105.07,192.26h45.46v177.31h-45.46v-177.31Z"/><path fill="#1d2d44" d="M1181.05,317.87c0-34.35,25.68-56.56,73.91-56.56h39.9v-8.67c0-17.7-14.57-27.41-33.31-27.41-20.12,0-35.74,8.67-45.11,26.02l-35.05-20.82c15.27-29.15,45.8-43.37,79.46-43.37,50.31,0,79.81,29.84,79.81,69.05v66.97c0,7.29,5.2,11.45,12.84,11.45h4.86v35.05h-23.25c-20.82,0-27.06-12.14-29.49-24.64-9.02,19.78-29.15,28.45-57.6,28.45-32.62,0-66.97-15.96-66.97-55.52ZM1294.87,305.72v-7.98h-37.82c-19.08,0-30.19,6.59-30.19,18.74s12.14,18.39,29.15,18.39c22.21,0,38.86-9.37,38.86-29.15Z"/></svg></div>
+    <div class="login-sub">Log ind for at fortsætte</div>
+    <label class="lbl">Email</label>
+    <input class="inp" id="login-email" type="email" placeholder="din@email.dk" onkeydown="if(event.key==='Enter')doLogin()">
+    <label class="lbl" style="margin-top:12px">Password</label>
+    <input class="inp" id="login-pw" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="btn btn-g" style="width:100%;justify-content:center;margin-top:16px;padding:10px" onclick="doLogin()">Log ind</button>
+    <div class="login-err" id="login-err"></div>
+  </div>
+</div>
+
+<div id="app" style="display:none;width:100%;height:100vh;flex-direction:row">
+  <div class="sidebar">
+    <div class="logo" style="padding:16px 20px 14px">
+      <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1358.37 506.61" style="height:28px;width:auto;display:block"><defs><linearGradient id="slg1" x1="179.31" y1="32.65" x2="401.15" y2="218.79" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#0072ff"/><stop offset=".5" stop-color="#ff4b8f"/><stop offset="1" stop-color="#ff7b24"/></linearGradient><linearGradient id="slg2" x1="5.34" y1="155.57" x2="363.79" y2="456.35" xlink:href="#slg1"/></defs><path fill="url(#slg1)" d="M394.68,70.38c-.64-.54-1.34-1.03-2.11-1.44L265.52,1.37c-1.91-1.01-3.97-1.44-5.99-1.36-2.33-.12-4.71.44-6.83,1.76-18.48,11.53-36.96,23.05-55.44,34.58-.33.14-.66.3-.98.5l-42.05,26.25c-1.29.81-2.25,1.95-2.82,3.26-.03.05-.07.1-.1.16h0c-1.9,3.57-.52,8.05,3.05,9.95l42.68,22.65c.34.18.7.33,1.05.45,5.4,2.87,10.81,5.75,16.21,8.62,4.45,2.4,11.27,6.09,20.47,11.05.67.36,1.03.55,1.07.57,16.81,9.06,29.19,15.84,34.07,18.36.87.45,3.03,1.57,4.63,3.94,2.11,3.13,1.99,6.35,1.91,7.36.03,1.37.06,2.75.09,4.12v77.43c-.09.58-.15,1.17-.15,1.78v18.49s0,.09,0,.13c-.05,4.16,2.07,8.23,5.91,10.45l19.43,11.22c3.4,1.96,7.4,2.02,10.75.53.71-.24,1.41-.53,2.08-.92l78.25-45.18c1.05-.61,1.98-1.36,2.76-2.21,1.27-1.23,2.26-2.74,2.88-4.43.86-1.64,1.36-3.5,1.36-5.48V80.13c0-4.03-2.05-7.61-5.15-9.75Z"/><path fill="url(#slg2)" d="M370.94,438.94v-3.73c.07-1.23.05-2.24.04-2.94-.01-1.3-.04-2.58-.04-3.88v-26.65c.01-.35.04-.71.05-1.06v-58.84c.03-.64-.01-1.62-.32-2.73-.8-2.88-2.9-4.58-4.71-6.05-1.02-.82-2.53-1.9-4.6-2.85-.95-.56-1.83-.98-2.53-1.28-21.59-11.64-43.17-23.29-64.75-34.93-12.13-6.63-24.25-13.26-36.38-19.89-.18-.14-.39-.32-.62-.52-2.83-2.17-4.68-5.57-4.68-9.4,0-8.22,0-92.06,0-92.58,0-5.76,0-5.51,0-5.81.04-1.75.11-3.02,0-4.91-.08-1.43-.24-2.6-.36-3.39-.06-.28-.15-.66-.29-1.1-.18-.55-.52-1.49-1.16-2.54-.27-.44-.64-1-1.15-1.59-.22-.26-.53-.6-.93-.97-.3-.27-.72-.61-1.47-1.1-.68-.43-1.03-.6-2.65-1.46-.6-.31-1.19-.63-1.79-.95-.86-.46-1.73-.92-2.59-1.38-.02-.01-110.83-58.94-111.88-59.5-.43-.23-1.03-.52-1.77-.76-1.33-.45-2.71-.64-4.07-.6-2.17-.02-4.37.54-6.34,1.77l-94.78,59.11c-.66.4-1.32.79-1.98,1.18-.82.49-1.57.99-2.3,1.49l-11.21,6.99c-2.93,1.83-4.77,4.75-5.36,7.92-.2.85-.31,1.74-.31,2.65v187.05c0,.09.01.17.01.26.04,4.06,2.15,8.01,5.9,10.18l244.03,140.89c1.92,1.11,4.03,1.6,6.1,1.56.08,0,.17,0,.25,0,.05,0,.1,0,.15,0,.06,0,.12-.01.19-.01,1.75-.01,3.52-.4,5.18-1.23l102.56-51.24c4.26-2.13,6.67-6.52,6.53-11,.05-.43.09-.87.09-1.31,0-.56-.04-1.14-.13-1.7.05-.39.07-.78.07-1.18ZM219.97,379.71c-3.12,5.72-10.35,7.84-16.06,4.72l-84.83-46.34c-2.22-1.22-3.89-3.07-4.94-5.19-.03-.05-.05-.12-.08-.17-.15-.31-.28-.62-.39-.94-.67-1.74-.95-3.61-.72-5.47-.05-.44-.08-.88-.08-1.34v-103.97c0-3.97,2.06-7.48,5.15-9.54.47-.33.95-.66,1.47-.92l35.01-18.14c5.78-3,12.97-.71,15.97,5.07,3,5.78.71,12.97-5.07,15.97-.17.08-12.14,6.29-12.26,6.36-1.82.94-5.57,2.88-6.4,3.31-.59.31-2.15,1-4.12,2.14-2.02,1.15-2.66,1.7-3.08,2.07-.47.43-1.53,1.49-2.42,3.16-.72,1.35-1.03,2.56-1.18,3.23-.23,1.07-.19,1.63-.17,5.21v68.52c0,1.43-.04,2.76,0,4.68.01.45.01.84.03,1.18,0,.12,0,.23.01.33-.01.03-.01.07,0,.09v.03c0,.12.01.23.01.33.23,3.4,1.9,6.65,4.75,8.75.44.33.91.63,1.41.9l39.77,21.59,33.52,18.31c5.72,3.13,7.84,10.36,4.71,16.08Z"/><path fill="#1d2d44" d="M548.16,130.15h62.81l79.46,239.42h-51.01l-15.27-48.58h-91.26l-15.27,48.58h-48.93l79.46-239.42ZM609.93,275.88l-24.64-78.07c-2.43-7.63-10.76-7.63-13.19,0l-24.64,78.07h62.46Z"/><path fill="#1d2d44" d="M705.69,333.48l35.39-21.17c9.37,15.61,24.29,24.29,45.46,24.29,23.94,0,31.92-9.37,31.92-18.04,0-11.8-8.67-15.27-24.98-17.7l-24.64-3.82c-32.96-5.2-58.99-19.08-58.99-51.7s28.8-58.29,74.6-58.29c36.43,0,63.5,14.92,75.3,39.21l-35.39,21.17c-9.72-16.66-26.02-22.21-40.25-22.21-21.51,0-29.15,7.63-29.15,17.35,0,10.41,7.98,12.84,26.02,15.96l22.9,3.82c32.96,5.55,59.68,17.35,59.68,52.74s-32.62,59.68-77.38,59.68c-38.86,0-66.97-14.92-80.5-41.29Z"/><path fill="#1d2d44" d="M892.37,192.26h43.03v26.72c9.37-17.7,26.37-30.88,56.56-30.88,49.27,0,82.58,37.48,82.58,92.99s-33.31,92.65-82.58,92.65c-27.41,0-44.41-11.45-53.78-26.02v83.97h-45.8v-239.42ZM1028.73,281.09c0-31.92-18.04-51.35-46.5-51.35s-46.15,19.78-46.15,51.35,18.04,51.01,46.15,51.01,46.5-19.43,46.5-51.01Z"/><path fill="#1d2d44" d="M1100.21,144.72c0-14.92,12.84-27.07,27.76-27.07s27.41,12.14,27.41,27.07-12.84,27.06-27.41,27.06-27.76-12.14-27.76-27.06ZM1105.07,192.26h45.46v177.31h-45.46v-177.31Z"/><path fill="#1d2d44" d="M1181.05,317.87c0-34.35,25.68-56.56,73.91-56.56h39.9v-8.67c0-17.7-14.57-27.41-33.31-27.41-20.12,0-35.74,8.67-45.11,26.02l-35.05-20.82c15.27-29.15,45.8-43.37,79.46-43.37,50.31,0,79.81,29.84,79.81,69.05v66.97c0,7.29,5.2,11.45,12.84,11.45h4.86v35.05h-23.25c-20.82,0-27.06-12.14-29.49-24.64-9.02,19.78-29.15,28.45-57.6,28.45-32.62,0-66.97-15.96-66.97-55.52ZM1294.87,305.72v-7.98h-37.82c-19.08,0-30.19,6.59-30.19,18.74s12.14,18.39,29.15,18.39c22.21,0,38.86-9.37,38.86-29.15Z"/></svg>
+      <div class="logo-sub">Overtagelsesoverblik</div>
+    </div>
+    <div class="nav-sec">Oversigt</div>
+    <button class="nav-item active" onclick="nav('dashboard',this)"><span class="nav-icon">🏠</span>Overblik</button>
+    <button class="nav-item" onclick="nav('tasks',this)"><span class="nav-icon">✓</span>Opgaver<span class="nav-badge nb-a" id="nav-badge-tasks"></span></button>
+    <button class="nav-item" onclick="nav('kanban',this)"><span class="nav-icon">⬜</span>Kanban</button>
+    <button class="nav-item" onclick="nav('deadlines',this)"><span class="nav-icon">📅</span>Deadlines</button>
+    <button class="nav-item" onclick="nav('institutions',this)"><span class="nav-icon">🏫</span>Institutioner<span class="nav-badge nb-g">53</span></button>
+    <div class="nav-sec">Administration</div>
+    <button class="nav-item" onclick="nav('activity',this)"><span class="nav-icon">📋</span>Aktivitetslog</button>
+    <button class="nav-item" onclick="nav('planning',this)"><span class="nav-icon">📁</span>Planlægning</button>
+    <div class="nav-bottom">
+      <button class="nav-item" onclick="syncNow()"><span class="nav-icon">↺</span>Synkroniser</button>
+      <button class="nav-item" onclick="openConfig()"><span class="nav-icon">⚙</span>Indstillinger</button>
+      <div class="sync-row"><div class="sdot" id="sdot"></div><span id="slabel">Ikke forbundet</span></div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <h1 id="page-title">Overblik</h1>
+      <button class="tbtn" onclick="syncNow()">↺ Synk</button>
+      <div id="topbar-user" style="display:flex;align-items:center;gap:8px;margin-left:4px">
+        <div id="topbar-avatar" style="width:28px;height:28px;border-radius:50%;background:var(--green-light);border:1.5px solid var(--green-badge);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--green)"></div>
+        <span id="topbar-name" style="font-size:12px;font-weight:500;color:var(--gray-600)"></span>
+      </div>
+      <button class="tbtn" onclick="doLogout()" title="Log ud" style="font-size:11px">Log ud</button>
+      <button class="tbtn g" onclick="openAddTask()">+ Ny opgave</button>
+    </div>
+    <div class="content">
+
+      <!-- DASHBOARD -->
+      <div class="page active" id="page-dashboard">
+        <div class="cd-banner" id="cd-banner"></div>
+        <div class="stats-grid" id="dash-stats"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="card">
+            <div class="card-hdr"><span class="card-title">Deadline overskredet</span><span class="badge b-r" id="ct-overdue"></span></div>
+            <div id="dash-overdue"></div>
+          </div>
+          <div class="card">
+            <div class="card-hdr"><span class="card-title">Nær deadline</span><span class="badge b-a" id="ct-near"></span></div>
+            <div id="dash-near"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hdr"><span class="card-title">Seneste aktivitet</span></div>
+          <div id="dash-activity"></div>
+        </div>
+      </div>
+
+      <!-- OPGAVER -->
+      <div class="page" id="page-tasks">
+        <div class="toolbar">
+          <input type="text" id="tq" placeholder="Søg..." oninput="renderTasks()">
+          <select id="tfs" onchange="renderTasks()">
+            <option value="">Alle statusser</option>
+            <option value="green">Afsluttet</option>
+            <option value="yellow">I gang</option>
+            <option value="red">Ikke påbegyndt</option>
+          </select>
+          <select id="tfc" onchange="renderTasks()"><option value="">Alle kategorier</option></select>
+        </div>
+        <div id="bulk-bar-wrap"></div>
+        <div class="card" style="padding:0">
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr>
+                <th style="padding-left:13px;width:30%">Kategori / opgave / institution</th>
+                <th style="width:10%">Ansvarlig</th>
+                <th style="width:10%">Status</th>
+                <th style="width:10%">Deadline</th>
+                <th style="width:7%">Komm.</th>
+                <th>Note</th>
+              </tr></thead>
+              <tbody id="task-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- KANBAN -->
+      <div class="page" id="page-kanban">
+        <div class="toolbar">
+          <input type="text" id="kq" placeholder="Søg..." oninput="renderKanban()">
+          <select id="kfc" onchange="renderKanban()"><option value="">Alle kategorier</option></select>
+        </div>
+        <div class="kanban" id="kanban-board"></div>
+      </div>
+
+      <!-- DEADLINES -->
+      <div class="page" id="page-deadlines">
+        <div id="deadline-groups"></div>
+      </div>
+
+      <!-- INSTITUTIONER -->
+      <div class="page" id="page-institutions">
+        <div class="toolbar">
+          <input type="text" id="iq" placeholder="Søg institution..." oninput="renderInstitutions()">
+          <select id="ift" onchange="renderInstitutions()"><option value="">Alle typer</option></select>
+        </div>
+        <div class="card" style="padding:0">
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr>
+                <th style="padding-left:13px;width:28%">Institution</th>
+                <th style="width:12%">Type</th>
+                <th style="width:12%">Kommune</th>
+                <th style="width:14%">Fremskridt</th>
+                <th style="width:7%">✓</th><th style="width:7%">→</th><th style="width:7%">✗</th>
+                <th></th>
+              </tr></thead>
+              <tbody id="inst-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- AKTIVITET -->
+      <div class="page" id="page-activity">
+        <div class="card">
+          <div class="card-hdr"><span class="card-title">Alle aktiviteter</span><button class="btn btn-sm" onclick="syncNow()">↺</button></div>
+          <div id="full-activity"></div>
+        </div>
+      </div>
+
+      <!-- PLANLÆGNING -->
+      <div class="page" id="page-planning">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <button class="btn btn-g btn-sm" onclick="openAddCat(null,null)">+ Ny kategori</button>
+        </div>
+        <div id="planning-tree"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- INDSTILLINGER MODAL -->
+<div class="modal-bg open" id="config-modal">
+  <div class="modal">
+    <h2>Indstillinger</h2>
+    <div id="cfg-admin-fields" style="display:none">
+    <p style="font-size:12px;color:var(--gray-600);margin-bottom:4px">Find under <strong>Settings → API Keys → Legacy anon</strong></p>
+    <label class="lbl">Project URL</label>
+    <input class="inp" id="cfg-url" type="text" placeholder="https://xxxxxxxx.supabase.co">
+    <label class="lbl">Anon key (Legacy)</label>
+    <input class="inp" id="cfg-key" type="text" placeholder="eyJhbGciOi...">
+    </div>
+    <label class="lbl">Overtagelsesdato</label>
+    <input class="inp" id="cfg-date" type="date" value="2026-10-01">
+    <div style="margin-top:14px;padding:12px 14px;background:var(--red-light);border:1px solid #f5c6c6;border-radius:8px;display:flex;align-items:center;gap:10px">
+      <input type="checkbox" id="cfg-bulk-delete" style="width:16px;height:16px;cursor:pointer;accent-color:var(--red)">
+      <label for="cfg-bulk-delete" style="font-size:12px;color:var(--red);font-weight:500;cursor:pointer">Tillad sletning af opgaver via bulk-opdatering</label>
+    </div>
+    <div id="cfg-sql-section" style="display:none">
+    <details style="margin-top:12px">
+      <summary style="font-size:12px;font-weight:600;cursor:pointer;color:var(--gray-600);display:flex;align-items:center;justify-content:space-between">
+        SQL-opsætning (kør én gang i Supabase SQL Editor)
+        <button class="btn btn-sm" style="font-size:11px;margin-left:10px" onclick="event.preventDefault();copySQL()">📋 Kopiér SQL</button>
+      </summary>
+      <pre id="sql-pre" style="background:var(--gray-50);border:1px solid var(--gray-200);border-radius:8px;padding:11px;font-size:11px;margin-top:7px;overflow-x:auto;white-space:pre-wrap"></pre>
+    </details>
+    </div>
+    <div id="cfg-err" style="display:none;background:var(--red-light);color:var(--red);padding:9px 12px;border-radius:7px;font-size:12px;margin-top:10px"></div>
+    <div class="mfoot"><button class="btn btn-g" onclick="saveConfig()" style="width:100%;justify-content:center;padding:10px">Gem og forbind</button></div>
+    <!-- BRUGERADMINISTRATION (kun admin) -->
+    <div id="user-admin-section" style="display:none;margin-top:20px;padding-top:16px;border-top:1px solid var(--gray-200)">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <span style="font-size:13px;font-weight:600">Brugere</span>
+        <button class="btn btn-g btn-sm" onclick="openNewUser()">+ Ny bruger</button>
+      </div>
+      <div id="user-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- NY BRUGER MODAL -->
+<div class="modal-bg" id="newuser-modal">
+  <div class="modal">
+    <button class="mx" onclick="closeModal('newuser-modal')">✕</button>
+    <h2 id="nu-title">Opret bruger</h2>
+    <label class="lbl">Navn (vises som ansvarlig)</label>
+    <input class="inp" id="nu-name" type="text" placeholder="Fx Mikael">
+    <label class="lbl">Email (bruges til login)</label>
+    <input class="inp" id="nu-email" type="email" placeholder="mikael@fobu.dk">
+    <label class="lbl">Password</label>
+    <input class="inp" id="nu-pw" type="password" placeholder="••••••••">
+    <label class="lbl">Rolle</label>
+    <select class="inp" id="nu-role">
+      <option value="bruger">Bruger</option>
+      <option value="admin">Admin</option>
+    </select>
+    <div class="mfoot">
+      <button class="btn" onclick="closeModal('newuser-modal')">Annuller</button>
+      <button class="btn btn-g" onclick="saveNewUser()">Opret bruger</button>
+    </div>
+  </div>
+</div>
+
+<!-- NY OPGAVE MODAL -->
+<div class="modal-bg" id="task-modal">
+  <div class="modal">
+    <button class="mx" onclick="closeModal('task-modal')">✕</button>
+    <h2 id="tm-title">Tilføj opgave</h2>
+    <label class="lbl">Kategori</label>
+    <select class="inp" id="tm-l1" onchange="tmL1()"><option value="">Vælg...</option></select>
+    <label class="lbl">Underkategori</label>
+    <select class="inp" id="tm-l2" onchange="tmL2()"><option value="">Vælg kategori først...</option></select>
+    <label class="lbl">Opgave</label>
+    <select class="inp" id="tm-l3"><option value="">Vælg underkategori først...</option></select>
+    <label class="lbl">Scope</label>
+    <select class="inp" id="tm-scope" onchange="tmScope()">
+      <option value="all">Alle 53 institutioner</option>
+      <option value="privat">Alle private institutioner</option>
+      <option value="selvejende">Alle selvejende institutioner</option>
+      <option value="inst">Enkelt institution</option>
+    </select>
+    <div id="tm-inst-wrap" style="display:none;margin-top:7px">
+      <select class="inp" id="tm-inst"><option value="">Vælg institution...</option></select>
+    </div>
+    <div class="scope-preview" id="scope-preview"></div>
+    <label class="lbl">Ansvarlig</label>
+    <select class="inp" id="tm-owner"><option value="">Ingen</option></select>
+    <label class="lbl">Status</label>
+    <select class="inp" id="tm-status">
+      <option value="red">Ikke påbegyndt</option>
+      <option value="yellow">I gang</option>
+      <option value="green">Afsluttet</option>
+    </select>
+    <label class="lbl">Deadline</label>
+    <input class="inp" id="tm-deadline" type="date">
+    <label class="lbl">Note</label>
+    <textarea class="inp" id="tm-note"></textarea>
+    <div class="mfoot">
+      <button class="btn" onclick="closeModal('task-modal')">Annuller</button>
+      <button class="btn btn-g" onclick="saveTask()" id="tm-save-btn">Gem opgave</button>
+    </div>
+  </div>
+</div>
+
+<!-- REDIGER OPGAVE MODAL -->
+<div class="modal-bg" id="edit-modal">
+  <div class="modal wide">
+    <button class="mx" onclick="closeModal('edit-modal')">✕</button>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+      <div>
+        <h2 id="em-title">Rediger opgave</h2>
+        <div id="em-inst" style="font-size:11px;color:var(--gray-400);margin-bottom:10px"></div>
+        <label class="lbl">Ansvarlig</label>
+        <select class="inp" id="em-owner"><option value="">Ingen</option></select>
+        <label class="lbl">Status</label>
+        <select class="inp" id="em-status">
+          <option value="red">Ikke påbegyndt</option>
+          <option value="yellow">I gang</option>
+          <option value="green">Afsluttet</option>
+        </select>
+        <label class="lbl">Deadline</label>
+        <input class="inp" id="em-deadline" type="date">
+        <label class="lbl">Note</label>
+        <textarea class="inp" id="em-note"></textarea>
+        <div style="display:flex;gap:7px;margin-top:14px">
+          <button class="btn btn-r btn-sm" onclick="delTaskEdit()" style="margin-right:auto">Slet</button>
+          <button class="btn" onclick="closeModal('edit-modal')">Annuller</button>
+          <button class="btn btn-g" onclick="saveEditTask()">Gem</button>
+        </div>
+      </div>
+      <div>
+        <h2>Kommentarer</h2>
+        <div class="comment-list" id="comment-list"></div>
+        <div class="comment-row">
+          <textarea class="inp" id="comment-text" placeholder="Skriv en kommentar..."></textarea>
+          <button class="btn btn-g btn-sm" onclick="addComment()">Send</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PLANLÆGNING MODALS -->
+<div class="modal-bg" id="pl-modal">
+  <div class="modal">
+    <button class="mx" onclick="closeModal('pl-modal')">✕</button>
+    <h2 id="pl-title">Tilføj</h2>
+    <div id="pl-parent-info" style="font-size:12px;color:var(--gray-400);margin-bottom:8px;display:none"></div>
+    <label class="lbl">Navn</label>
+    <input class="inp" id="pl-name" type="text" placeholder="Navn...">
+    <div class="mfoot">
+      <button class="btn" onclick="closeModal('pl-modal')">Annuller</button>
+      <button class="btn btn-g" onclick="savePl()">Gem</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="pl-edit-modal">
+  <div class="modal">
+    <button class="mx" onclick="closeModal('pl-edit-modal')">✕</button>
+    <h2>Omdøb</h2>
+    <label class="lbl">Navn</label>
+    <input class="inp" id="pl-edit-name" type="text">
+    <div class="mfoot">
+      <button class="btn" onclick="closeModal('pl-edit-modal')">Annuller</button>
+      <button class="btn btn-g" onclick="savePlEdit()">Gem</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SETUP_SQL=`-- Kør i Supabase SQL Editor
+
+create table if not exists brugere (
+  id text primary key,
+  navn text not null,
+  email text not null unique,
+  password_hash text not null,
+  rolle text not null default 'bruger',
+  aktiv boolean not null default true,
+  oprettet timestamptz default now()
+);
+
+alter table brugere enable row level security;
+create policy "public all brugere" on brugere for all using (true);
+
+create table if not exists kategorier (
+  id text primary key,
+  niveau integer not null,
+  navn text not null,
+  parent_id text default '',
+  oprettet timestamptz default now()
+);
+
+create table if not exists opgaver (
+  id text primary key,
+  skabelon_id text not null,
+  inst_id text not null,
+  owner text default '',
+  status text not null default 'red',
+  deadline date,
+  note text default '',
+  oprettet timestamptz default now(),
+  sidst_aendret timestamptz default now(),
+  sidst_aendret_af text default ''
+);
+
+create table if not exists kommentarer (
+  id text primary key,
+  opgave_id text not null,
+  tekst text not null,
+  forfatter text not null,
+  oprettet timestamptz default now()
+);
+
+create table if not exists aktivitet (
+  id text primary key,
+  type text not null,
+  tekst text not null,
+  forfatter text not null,
+  opgave_id text default '',
+  oprettet timestamptz default now()
+);
+
+alter table kategorier enable row level security;
+alter table opgaver enable row level security;
+alter table kommentarer enable row level security;
+alter table aktivitet enable row level security;
+create policy "public all kategorier" on kategorier for all using (true);
+create policy "public all opgaver" on opgaver for all using (true);
+create policy "public all kommentarer" on kommentarer for all using (true);
+create policy "public all aktivitet" on aktivitet for all using (true);
+
+insert into kategorier (id,niveau,navn,parent_id) values
+('c1',1,'Betalingstjenester',''),('c1a',2,'OS2-aftaler','c1'),('c1b',2,'Betalingsservice','c1'),
+('c2',1,'Kommunikation',''),('c2a',2,'Velkomstbrev','c2'),
+('c3',1,'IT',''),('c3a',2,'Zendesk','c3'),('c3b',2,'E-boks','c3'),('c3c',2,'EAN','c3'),
+('c4',1,'Kontrakter',''),('c4a',2,'Kontraktgennemgang','c4'),('c4b',2,'KYC','c4'),('c4c',2,'Forsikringer','c4'),
+('c5',1,'Systemopsætning',''),('c5a',2,'Lessor','c5'),('c5b',2,'SubIT','c5'),('c5c',2,'Business Central','c5')
+on conflict (id) do nothing;`;
+
+document.getElementById('sql-pre').textContent=SETUP_SQL;
+
+// ─── INSTITUTIONER ───────────────────────────────────────────────
+const INSTS=[
+  {id:'i01',name:'Asserballe Private Børnehus',type:'Privat',kommune:'Sønderborg'},
+  {id:'i02',name:'Bjørnegården',type:'Selvejende',kommune:'Gribskov'},
+  {id:'i03',name:'Bommerhaven',type:'Privat',kommune:'Vejle'},
+  {id:'i04',name:'Bryggens Børne- og Ungdomscenter',type:'Selvejende',kommune:'København (S)'},
+  {id:'i05',name:'Byggelegepladsen Regnbuen',type:'Selvejende',kommune:'Hvidovre'},
+  {id:'i06',name:'Børnebo, Lyne',type:'Privat',kommune:'RKSK/Varde'},
+  {id:'i07',name:'Børnehaven Voldparken',type:'Selvejende',kommune:'København (Brønshøj)'},
+  {id:'i08',name:'Børnehaven Østergade',type:'Privat',kommune:'Morsø'},
+  {id:'i09',name:'Børnegården Rundhøj',type:'Selvejende',kommune:'Aarhus (Højbjerg)'},
+  {id:'i10',name:'Børnehaven Evigglad S/I',type:'Privat',kommune:'Frederiksberg'},
+  {id:'i11',name:'Børnehaven Forglemmigej',type:'Privat',kommune:'Nørresundby'},
+  {id:'i12',name:'Børnehaven Sct. Georgsgården',type:'Privat',kommune:'Lemvig'},
+  {id:'i13',name:'Børnehuset Lindely',type:'Privat',kommune:'Herning'},
+  {id:'i14',name:'Børnehuset Pippi',type:'Privat',kommune:'Aalborg'},
+  {id:'i15',name:'Børnehuset Siv',type:'Privat',kommune:'Furesø'},
+  {id:'i16',name:'Børnehuset Skovgården',type:'Privat',kommune:'Holstebro'},
+  {id:'i17',name:'Cathrine Asylets Folkebørnehave',type:'Privat',kommune:'Haderslev'},
+  {id:'i18',name:'Daginstitutionen Gaardhaven ApS',type:'Privat',kommune:'Vejle'},
+  {id:'i19',name:'Dr. Louises Børnehave',type:'Privat',kommune:'Silkeborg'},
+  {id:'i20',name:'Daginstitutionen Dagmargården',type:'Privat',kommune:'Fredericia'},
+  {id:'i21',name:'Daginstitutionen Troldehulen ApS',type:'Privat',kommune:'Aalborg'},
+  {id:'i22',name:'Dansk Tysk Børnehus ApS',type:'Privat',kommune:'Frederiksberg'},
+  {id:'i23',name:'Den Musikalske Børnehave',type:'Privat',kommune:'Aalborg'},
+  {id:'i24',name:'Den Integrerede Institution Bryggehuset',type:'Selvejende',kommune:'København (S)'},
+  {id:'i25',name:'Den Private Institution Snurretoppen',type:'Privat',kommune:'Nørresundby'},
+  {id:'i26',name:'Døstrup Børnehus NaturligVis',type:'Privat',kommune:'Mariagerfjord'},
+  {id:'i27',name:'Eventyrskoven Steinerinstitution',type:'Privat',kommune:'Vordingborg'},
+  {id:'i28',name:'Fritidsklubben Furesøgård',type:'Privat',kommune:'Furesø'},
+  {id:'i29',name:'Holsted Børnehave',type:'Privat',kommune:'Vejen'},
+  {id:'i30',name:'Herning Valgmenigheds Skovbørnehave',type:'Privat',kommune:'Herning'},
+  {id:'i31',name:'Huset i Skoven',type:'Privat',kommune:'Ukendt'},
+  {id:'i32',name:"KVL's Børnehus",type:'Privat',kommune:'Frederiksberg'},
+  {id:'i33',name:'Kammas Børnehus',type:'Privat',kommune:'Ukendt'},
+  {id:'i34',name:'Kirsebærhaven, S/I',type:'Privat',kommune:'Mariagerfjord'},
+  {id:'i35',name:'Køgevejens Børne- og Ungdomshus',type:'Selvejende',kommune:'Hvidovre'},
+  {id:'i36',name:'Legehuset Hulahop S/I',type:'Privat',kommune:'Syddjurs'},
+  {id:'i37',name:'Montessori International Preschool Frederiksberg ApS',type:'Privat',kommune:'Frederiksberg'},
+  {id:'i38',name:'Montessori International Preschool Valby',type:'Privat',kommune:'København'},
+  {id:'i39',name:'Mikael & Bette Mikael Børnehave og Vuggestue',type:'Privat',kommune:'Hjørring'},
+  {id:'i40',name:'Nørrebros Børnehave',type:'Privat',kommune:'Nykøbing F'},
+  {id:'i41',name:'Privatbørnehaven Lille Vestervang',type:'Privat',kommune:'Holbæk'},
+  {id:'i42',name:'Privatinstitutionen Børnehuset Bjørnehulen',type:'Privat',kommune:'Aalborg'},
+  {id:'i43',name:'Rudolf Steiner Børnehave – Malene',type:'Privat',kommune:'Fredensborg'},
+  {id:'i44',name:'S/I Idrætsfritidsinstitutionen Skjold - FC',type:'Selvejende',kommune:'København'},
+  {id:'i45',name:'Skovbo Skovbørnehave',type:'Privat',kommune:'Gentofte'},
+  {id:'i46',name:'Tinytots International Preschool ApS',type:'Privat',kommune:'København'},
+  {id:'i47',name:'Tvingstrup Landsbybørnehave',type:'Privat',kommune:'Horsens'},
+  {id:'i48',name:'Verdens Børn ApS',type:'Privat',kommune:'København'},
+  {id:'i49',name:'Verdens Børn Farum ApS',type:'Privat',kommune:'Furesø'},
+  {id:'i50',name:'Verdens Børn Glostrup ApS',type:'Privat',kommune:'Glostrup'},
+  {id:'i51',name:'Vuggehaven i Nørregade S/I',type:'Selvejende',kommune:'København (K)'},
+  {id:'i52',name:'Vuggestuen Evigglad privat S/I',type:'Privat',kommune:'Frederiksberg'},
+  {id:'i53',name:'Waldorf Børnehaven Lille Bjørn S/I',type:'Selvejende',kommune:'Furesø'},
+];
+
+function instsForScope(sc,instId){
+  if(sc==='all') return INSTS;
+  if(sc==='privat') return INSTS.filter(i=>i.type.toLowerCase().includes('privat'));
+  if(sc==='selvejende') return INSTS.filter(i=>i.type.toLowerCase().includes('selvejende'));
+  if(sc==='inst') return INSTS.filter(i=>i.id===instId);
+  return [];
+}
+
+// ─── STATE ───────────────────────────────────────────────────────
+let SB_URL=localStorage.getItem('fobu_sb_url')||'';
+let SB_KEY=localStorage.getItem('fobu_sb_key')||'';
+let OV_DATE=localStorage.getItem('fobu_ov_date')||'2026-10-01';
+let BRUGER=localStorage.getItem('fobu_bruger')||'';
+let BULK_DELETE=false; // nulstilles altid – slås til manuelt per session
+let state={cats:[],tasks:[],kommentarer:[],aktivitet:[],brugere:[]};
+let CURRENT_USER=null; // {id,navn,email,rolle}
+let editTaskId=null,editPlCtx=null,editPlRef=null;
+let expanded={},dragSubId=null,dragFromL1=null;
+let bulkL1=null,bulkL2=null,bulkL3=null;
+
+window.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('sql-pre').textContent=SETUP_SQL;
+  populateInstSelect();
+  // check saved session
+  const saved=localStorage.getItem('fobu_session');
+  if(saved&&SB_URL&&SB_KEY){
+    CURRENT_USER=JSON.parse(saved);
+    bootApp();
+  }
+  // else stay on login screen
+});
+
+function bootApp(){
+  document.getElementById('login-screen').classList.remove('show');
+  document.getElementById('app').style.display='flex';
+  prefillConfig();
+  closeModal('config-modal');
+  updateTopbarUser();
+  syncNow();
+}
+
+function updateTopbarUser(){
+  if(!CURRENT_USER)return;
+  const initials=CURRENT_USER.navn.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  document.getElementById('topbar-avatar').textContent=initials;
+  document.getElementById('topbar-name').textContent=CURRENT_USER.navn;
+}
+
+async function sha256(str){
+  const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+async function doLogin(){
+  const email=document.getElementById('login-email').value.trim().toLowerCase();
+  const pw=document.getElementById('login-pw').value;
+  if(!email||!pw){showLoginErr('Udfyld email og password');return}
+  if(!SB_URL||!SB_KEY){showLoginErr('Opsæt Supabase-forbindelsen først – klik på "Forbind" nedenfor');return}
+  try{
+    const hash=await sha256(pw);
+    const rows=await sbGet('brugere','email=eq.'+encodeURIComponent(email)+'&password_hash=eq.'+hash+'&aktiv=eq.true');
+    if(!rows.length){showLoginErr('Forkert email eller password');return}
+    CURRENT_USER={id:rows[0].id,navn:rows[0].navn,email:rows[0].email,rolle:rows[0].rolle};
+    localStorage.setItem('fobu_session',JSON.stringify(CURRENT_USER));
+    BRUGER=CURRENT_USER.navn;
+    bootApp();
+  }catch(e){showLoginErr('Fejl: '+e.message)}
+}
+
+function doLogout(){
+  localStorage.removeItem('fobu_session');
+  CURRENT_USER=null;BRUGER='';
+  document.getElementById('app').style.display='none';
+  document.getElementById('login-screen').classList.add('show');
+  document.getElementById('login-email').value='';
+  document.getElementById('login-pw').value='';
+}
+
+function showLoginErr(m){const el=document.getElementById('login-err');el.textContent=m;el.style.display='block'}
+
+// ─── BRUGERE ─────────────────────────────────────────────────────
+function renderUserList(){
+  const isAdmin=CURRENT_USER&&CURRENT_USER.rolle==='admin';
+  document.getElementById('user-admin-section').style.display=isAdmin?'block':'none';
+  if(!isAdmin)return;
+  const html=state.brugere.map(u=>`<div class="user-row">
+    <div class="user-avatar">${u.navn.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase()}</div>
+    <div class="user-info">
+      <div class="user-name">${esc(u.navn)}</div>
+      <div class="user-email">${esc(u.email)}</div>
+    </div>
+    <span class="role-tag ${u.rolle==='admin'?'role-admin':'role-user'}">${u.rolle}</span>
+    ${!u.aktiv?'<span class="inactive-tag">Inaktiv</span>':''}
+    ${u.id!==CURRENT_USER.id?`<button class="btn btn-sm btn-r" onclick="toggleUserAktiv('${u.id}',${u.aktiv})">${u.aktiv?'Deaktiver':'Aktiver'}</button>`:'<span style="font-size:11px;color:var(--gray-400)">(dig)</span>'}
+  </div>`).join('');
+  document.getElementById('user-list').innerHTML=html||'<div style="font-size:12px;color:var(--gray-400)">Ingen brugere endnu</div>';
+}
+
+let editUserId=null;
+function openNewUser(){editUserId=null;document.getElementById('nu-title').textContent='Opret bruger';['nu-name','nu-email','nu-pw'].forEach(id=>document.getElementById(id).value='');document.getElementById('nu-role').value='bruger';document.getElementById('newuser-modal').classList.add('open')}
+
+async function saveNewUser(){
+  const navn=document.getElementById('nu-name').value.trim();
+  const email=document.getElementById('nu-email').value.trim().toLowerCase();
+  const pw=document.getElementById('nu-pw').value;
+  const rolle=document.getElementById('nu-role').value;
+  if(!navn||!email||!pw){toast('Udfyld alle felter',true);return}
+  const hash=await sha256(pw);
+  closeModal('newuser-modal');
+  try{
+    await sbPost('brugere',{id:'u'+Date.now(),navn,email,password_hash:hash,rolle,aktiv:true,oprettet:new Date().toISOString()});
+    toast(navn+' oprettet');await syncNow();renderUserList();
+  }catch(e){toast('Fejl: '+e.message,true)}
+}
+
+async function toggleUserAktiv(id,aktiv){
+  if(!confirm(aktiv?'Deaktiver denne bruger?':'Aktiver denne bruger?'))return;
+  try{await sbPatch('brugere',id,{aktiv:!aktiv});toast('Opdateret');await syncNow();renderUserList()}
+  catch(e){toast('Fejl: '+e.message,true)}
+}
+
+function refreshOwnerDropdown(){
+  const aktive=state.brugere.filter(u=>u.aktiv);
+  ['tm-owner','em-owner'].forEach(id=>{
+    const el=document.getElementById(id);if(!el)return;
+    const cur=el.tagName==='SELECT'?el.value:el.value;
+    if(el.tagName==='SELECT'){
+      el.innerHTML='<option value="">Ingen</option>'+aktive.map(u=>`<option value="${esc(u.navn)}">${esc(u.navn)}</option>`).join('');
+      el.value=cur;
+    }
+  });
+}
+
+function prefillConfig(){
+  const isAdmin=!CURRENT_USER||CURRENT_USER.rolle==='admin';
+  document.getElementById('cfg-admin-fields').style.display=isAdmin?'block':'none';
+  document.getElementById('cfg-sql-section').style.display=isAdmin?'block':'none';
+  if(isAdmin){document.getElementById('cfg-url').value=SB_URL;document.getElementById('cfg-key').value=SB_KEY}
+  document.getElementById('cfg-date').value=OV_DATE;
+  document.getElementById('cfg-bulk-delete').checked=BULK_DELETE;
+}
+function openConfig(){prefillConfig();renderUserList();document.getElementById('config-modal').classList.add('open')}
+async function saveConfig(){
+  const isAdmin=!CURRENT_USER||CURRENT_USER.rolle==='admin';
+  if(isAdmin){
+    const url=document.getElementById('cfg-url').value.trim().replace(/\/$/,'');
+    const key=document.getElementById('cfg-key').value.trim();
+    if(!url||!key){showCfgErr('Udfyld URL og nøgle');return}
+    SB_URL=url;SB_KEY=key;
+    localStorage.setItem('fobu_sb_url',SB_URL);localStorage.setItem('fobu_sb_key',SB_KEY);
+  }
+  OV_DATE=document.getElementById('cfg-date').value||'2026-10-01';
+  BULK_DELETE=document.getElementById('cfg-bulk-delete').checked;
+  localStorage.setItem('fobu_ov_date',OV_DATE);
+  if(!CURRENT_USER){closeModal('config-modal');toast('Forbindelsen er gemt – log ind nu');return}
+  closeModal('config-modal');await syncNow();
+}
+function showCfgErr(m){const el=document.getElementById('cfg-err');el.textContent=m;el.style.display='block'}
+function copySQL(){navigator.clipboard.writeText(SETUP_SQL).then(()=>toast('SQL kopieret')).catch(()=>toast('Kopiér manuelt fra boksen',true))}
+
+// ─── SUPABASE ────────────────────────────────────────────────────
+function sbH(){return{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=minimal'}}
+async function sbGet(t,p=''){const r=await fetch(SB_URL+'/rest/v1/'+t+'?'+p+'&limit=5000',{headers:sbH()});if(!r.ok)throw new Error(await r.text());return r.json()}
+async function sbPost(t,b){const r=await fetch(SB_URL+'/rest/v1/'+t,{method:'POST',headers:{...sbH(),'Prefer':'return=minimal'},body:JSON.stringify(b)});if(!r.ok)throw new Error(await r.text())}
+async function sbPostBatch(t,rows){for(let i=0;i<rows.length;i+=50){const r=await fetch(SB_URL+'/rest/v1/'+t,{method:'POST',headers:{...sbH(),'Prefer':'return=minimal'},body:JSON.stringify(rows.slice(i,i+50))});if(!r.ok)throw new Error(await r.text())}}
+async function sbPatch(t,id,b){const r=await fetch(SB_URL+'/rest/v1/'+t+'?id=eq.'+id,{method:'PATCH',headers:sbH(),body:JSON.stringify(b)});if(!r.ok)throw new Error(await r.text())}
+async function sbDelete(t,f){const r=await fetch(SB_URL+'/rest/v1/'+t+'?'+f,{method:'DELETE',headers:sbH()});if(!r.ok)throw new Error(await r.text())}
+async function logAkt(type,tekst,opgaveId=''){try{await sbPost('aktivitet',{id:'a'+Date.now()+Math.random().toString(36).slice(2,5),type,tekst,forfatter:BRUGER||'Anonym',opgave_id:opgaveId,oprettet:new Date().toISOString()})}catch(e){}}
+
+// ─── SYNC ────────────────────────────────────────────────────────
+async function syncNow(){
+  if(CURRENT_USER)BRUGER=CURRENT_USER.navn;
+  setSS('syncing');
+  try{
+    const [rawCats,rawTasks,rawKomm,rawAkt,rawBrug]=await Promise.all([
+      sbGet('kategorier','order=niveau.asc,oprettet.asc'),
+      sbGet('opgaver','order=oprettet.asc'),
+      sbGet('kommentarer','order=oprettet.desc'),
+      sbGet('aktivitet','order=oprettet.desc&limit=50'),
+      sbGet('brugere','order=navn.asc'),
+    ]);
+    state.cats=buildTree(rawCats);
+    state.tasks=rawTasks.map(r=>({id:r.id,skabelonId:r.skabelon_id,instId:r.inst_id,owner:r.owner||'',status:r.status||'red',deadline:r.deadline||'',note:r.note||'',sidstAf:r.sidst_aendret_af||'',sidst:r.sidst_aendret||''}));
+    state.kommentarer=rawKomm.map(r=>({id:r.id,opgaveId:r.opgave_id,tekst:r.tekst,forfatter:r.forfatter,oprettet:r.oprettet}));
+    state.aktivitet=rawAkt.map(r=>({id:r.id,type:r.type,tekst:r.tekst,forfatter:r.forfatter,opgaveId:r.opgave_id,oprettet:r.oprettet}));
+    state.brugere=rawBrug.map(r=>({id:r.id,navn:r.navn,email:r.email,rolle:r.rolle,aktiv:r.aktiv}));
+    setSS('ok');render();refreshOwnerDropdown();renderUserList();
+  }catch(e){setSS('err');toast('Synk fejlede: '+e.message,true)}
+}
+
+function buildTree(rows){
+  const l1=rows.filter(r=>Number(r.niveau)===1);
+  return l1.map(c=>({
+    id:c.id,name:c.navn,
+    subs:rows.filter(r=>Number(r.niveau)===2&&r.parent_id===c.id).map(s=>({
+      id:s.id,name:s.navn,
+      items:rows.filter(r=>Number(r.niveau)===3&&r.parent_id===s.id).map(i=>({id:i.id,name:i.navn}))
+    }))
+  }));
+}
+
+function setSS(st){
+  const d=document.getElementById('sdot'),l=document.getElementById('slabel');
+  d.className='sdot'+(st==='ok'?' ok':st==='err'?' err':'');
+  l.textContent=st==='ok'?'Synk '+new Date().toLocaleTimeString('da-DK',{hour:'2-digit',minute:'2-digit'}):st==='err'?'Fejl':'Synkroniserer...';
+}
+
+// ─── HELPERS ─────────────────────────────────────────────────────
+function findL1(id){return state.cats.find(c=>c.id===id)}
+function findL2(l1id,l2id){const c=findL1(l1id);return c?(c.subs||[]).find(s=>s.id===l2id):null}
+function findL3(l2id,l3id){for(const cat of state.cats){for(const sub of cat.subs||[]){if(sub.id===l2id)return(sub.items||[]).find(i=>i.id===l3id)}}return null}
+function findSkabelon(sid){for(const cat of state.cats){for(const sub of cat.subs||[]){const it=(sub.items||[]).find(i=>i.id===sid);if(it)return{cat,sub,item:it}}}return null}
+function instById(id){return INSTS.find(i=>i.id===id)}
+function sbadge(s){
+  if(s==='green')return '<span class="badge b-g">Afsluttet</span>';
+  if(s==='yellow')return '<span class="badge b-a">I gang</span>';
+  return '<span class="badge b-r">Ikke påbegyndt</span>';
+}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function toast(msg,err=false){const el=document.getElementById('toast');el.textContent=msg;el.style.background=err?'var(--red)':'var(--gray-900)';el.classList.add('show');setTimeout(()=>el.classList.remove('show'),3000)}
+function closeModal(id){document.getElementById(id).classList.remove('open')}
+function timeAgo(iso){if(!iso)return'';const diff=Date.now()-new Date(iso).getTime();const m=Math.floor(diff/60000),h=Math.floor(m/60),d=Math.floor(h/24);if(d>0)return d+'d siden';if(h>0)return h+'t siden';if(m>0)return m+'m siden';return'Nu'}
+
+// ─── NAV ─────────────────────────────────────────────────────────
+function render(){
+  renderCountdown();renderDashboard();renderTasks();renderKanban();renderDeadlines();
+  renderInstitutions();renderActivity();renderPlanning();refreshCatFilters();
+}
+function nav(page,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  btn.classList.add('active');
+  const titles={dashboard:'Overblik',tasks:'Opgaver',kanban:'Kanban',deadlines:'Deadlines',institutions:'Institutioner',activity:'Aktivitetslog',planning:'Planlægning'};
+  document.getElementById('page-title').textContent=titles[page]||page;
+}
+
+// ─── COUNTDOWN ───────────────────────────────────────────────────
+function renderCountdown(){
+  const t=state.tasks;
+  const today=new Date();today.setHours(0,0,0,0);
+  const target=new Date(OV_DATE);
+  const days=Math.ceil((target-today)/86400000);
+  const gr=t.filter(x=>x.status==='green').length,ye=t.filter(x=>x.status==='yellow').length,re=t.filter(x=>x.status==='red').length;
+  const pct=t.length?Math.round(gr/t.length*100):0;
+  const todayStr=today.toISOString().slice(0,10);
+  const ov=t.filter(x=>x.deadline&&x.deadline<todayStr&&x.status!=='green').length;
+  const col=days<=14?'#ff6b6b':days<=60?'#fcd975':'#a8d8a8';
+  document.getElementById('cd-banner').innerHTML=`
+    <div style="text-align:center;min-width:70px">
+      <div class="cd-days" style="color:${col}">${Math.max(0,days)}</div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.5)">${days<0?'dage siden':'dage til'}</div>
+    </div>
+    <div class="cd-sep"></div>
+    <div style="flex:1">
+      <div style="font-size:14px;font-weight:600;margin-bottom:3px">Overtagelse ${new Date(OV_DATE).toLocaleDateString('da-DK',{day:'numeric',month:'long',year:'numeric'})}</div>
+      <div style="font-size:12px;color:rgba(255,255,255,0.55)">${pct}% afsluttet${ov?' · '+ov+' overskredet':''}</div>
+    </div>
+    <div class="cd-pills">
+      <div class="cd-pill cdp-g">✓ ${gr}</div>
+      <div class="cd-pill cdp-a">→ ${ye}</div>
+      <div class="cd-pill cdp-r">✗ ${re}</div>
+    </div>`;
+}
+
+// ─── DASHBOARD ───────────────────────────────────────────────────
+function renderDashboard(){
+  const t=state.tasks;
+  const today=new Date().toISOString().slice(0,10);
+  const tom=new Date();tom.setDate(tom.getDate()+1);const tomStr=tom.toISOString().slice(0,10);
+  const gr=t.filter(x=>x.status==='green').length,ye=t.filter(x=>x.status==='yellow').length,re=t.filter(x=>x.status==='red').length;
+  const ov=t.filter(x=>x.deadline&&x.deadline<today&&x.status!=='green').length;
+  const pct=t.length?Math.round(gr/t.length*100):0;
+  document.getElementById('nav-badge-tasks').textContent=(re+ye)||'';
+  document.getElementById('dash-stats').innerHTML=`
+    <div class="stat-card"><div class="stat-lbl">Institutioner</div><div class="stat-val">53</div></div>
+    <div class="stat-card"><div class="stat-lbl">Opgaver i alt</div><div class="stat-val">${t.length}</div></div>
+    <div class="stat-card"><div class="stat-lbl">Afsluttet</div><div class="stat-val sv-g">${gr}</div><div class="stat-sub">${pct}%</div></div>
+    <div class="stat-card"><div class="stat-lbl">I gang</div><div class="stat-val sv-a">${ye}</div></div>
+    <div class="stat-card"><div class="stat-lbl">Ikke påbegyndt</div><div class="stat-val sv-r">${re}</div></div>
+    <div class="stat-card"><div class="stat-lbl">Overskredet</div><div class="stat-val sv-r">${ov}</div></div>`;
+
+  // overdue grouped by skabelon
+  const overdueT=t.filter(x=>x.deadline&&x.deadline<today&&x.status!=='green');
+  const odGroups={};
+  overdueT.forEach(x=>{if(!odGroups[x.skabelonId])odGroups[x.skabelonId]=[];odGroups[x.skabelonId].push(x)});
+  document.getElementById('ct-overdue').textContent=Object.keys(odGroups).length||'';
+  document.getElementById('dash-overdue').innerHTML=Object.keys(odGroups).length?
+    Object.entries(odGroups).map(([sid,tasks])=>{
+      const sk=findSkabelon(sid);const gr2=tasks.filter(x=>x.status==='green').length;
+      return`<div class="activity-item cr" onclick="jumpToSkabelon('${sid}')">
+        <div class="a-dot r"></div>
+        <div class="a-body"><div><span class="a-who">${esc(sk?sk.item.name:'–')}</span></div>
+        <div class="a-text">${sk?esc(sk.cat.name+' › '+sk.sub.name):''} · ${gr2}/${tasks.length} afsluttet · tidligste: ${tasks.map(x=>x.deadline).sort()[0]}</div></div>
+      </div>`}).join(''):
+    '<div style="font-size:12px;color:var(--gray-400);padding:8px 0">Ingen overskredet deadlines 🎉</div>';
+
+  const nearT=t.filter(x=>x.deadline&&x.deadline>=today&&x.deadline<=tomStr&&x.status!=='green');
+  document.getElementById('ct-near').textContent=nearT.length||'';
+  document.getElementById('dash-near').innerHTML=nearT.length?
+    nearT.slice(0,6).map(x=>{const sk=findSkabelon(x.skabelonId);const inst=instById(x.instId);return`<div class="activity-item cr" onclick="openEditSingle('${x.id}')">
+      <div class="a-dot a"></div>
+      <div class="a-body"><div><span class="a-who">${esc(sk?sk.item.name:'–')}</span><span class="a-time">${esc(x.deadline)}</span></div>
+      <div class="a-text">${esc(inst?inst.name:'–')}</div></div>
+    </div>`}).join(''):
+    '<div style="font-size:12px;color:var(--gray-400);padding:8px 0">Ingen deadlines i dag eller i morgen</div>';
+
+  const akt=state.aktivitet.slice(0,5);
+  document.getElementById('dash-activity').innerHTML=akt.length?
+    akt.map(a=>`<div class="activity-item"><div class="a-dot ${a.type==='comment'?'c':a.type==='green'?'':'a'}"></div>
+      <div class="a-body"><div><span class="a-who">${esc(a.forfatter)}</span><span class="a-time">${timeAgo(a.oprettet)}</span></div>
+      <div class="a-text">${esc(a.tekst)}</div></div></div>`).join(''):
+    '<div style="font-size:12px;color:var(--gray-400);padding:8px 0">Ingen aktivitet endnu</div>';
+}
+
+// ─── OPGAVER (4-lags træ) ────────────────────────────────────────
+function refreshCatFilters(){
+  ['tfc','kfc'].forEach(id=>{
+    const el=document.getElementById(id);if(!el)return;
+    const cur=el.value;
+    el.innerHTML='<option value="">Alle kategorier</option>'+state.cats.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');
+    el.value=cur;
+  });
+}
+
+function getFilteredTasks(){
+  const q=(document.getElementById('tq')||{value:''}).value.toLowerCase();
+  const fs=(document.getElementById('tfs')||{value:''}).value;
+  const fc=(document.getElementById('tfc')||{value:''}).value;
+  return state.tasks.filter(t=>{
+    if(fs&&t.status!==fs)return false;
+    const sk=findSkabelon(t.skabelonId);
+    if(fc&&sk&&sk.cat.id!==fc)return false;
+    if(q){
+      const inst=instById(t.instId);
+      const nm=(sk?sk.item.name+' '+sk.sub.name+' '+sk.cat.name:'').toLowerCase();
+      if(!nm.includes(q)&&!(inst?inst.name:'').toLowerCase().includes(q)&&!(t.owner||'').toLowerCase().includes(q))return false;
+    }
+    return true;
+  });
+}
+
+function renderTasks(){
+  const filtered=getFilteredTasks();
+  const today=new Date().toISOString().slice(0,10);
+  let html='';
+
+  state.cats.forEach(cat=>{
+    const catTasks=filtered.filter(t=>{const sk=findSkabelon(t.skabelonId);return sk&&sk.cat.id===cat.id});
+    if(!catTasks.length)return;
+    const k1='l1_'+cat.id,o1=expanded[k1]!==false;
+    const done1=catTasks.filter(t=>t.status==='green').length;
+    html+=`<tr class="tl1"><td colspan="6" style="padding:8px 13px">
+      <span class="chev${o1?' open':''}" onclick="toggleExp('${k1}')">▶</span>
+      ${esc(cat.name)}<span style="font-size:10px;color:var(--gray-400);margin-left:7px;font-weight:400">${done1}/${catTasks.length}</span>
+    </td></tr>`;
+
+    (cat.subs||[]).forEach(sub=>{
+      const subTasks=filtered.filter(t=>{const sk=findSkabelon(t.skabelonId);return sk&&sk.sub.id===sub.id});
+      if(!subTasks.length||!o1)return;
+      const k2='l2_'+sub.id,o2=expanded[k2]!==false;
+      const done2=subTasks.filter(t=>t.status==='green').length;
+      html+=`<tr class="tl2"><td colspan="6" style="padding:6px 13px 6px 26px">
+        <span class="chev${o2?' open':''}" onclick="toggleExp('${k2}')">▶</span>
+        ${esc(sub.name)}<span style="font-size:10px;color:var(--gray-400);margin-left:6px">${done2}/${subTasks.length}</span>
+      </td></tr>`;
+
+      (sub.items||[]).forEach(item=>{
+        const itemTasks=filtered.filter(t=>t.skabelonId===item.id);
+        if(!itemTasks.length||!o2)return;
+        const k3='l3_'+item.id,o3=expanded[k3]!==false;
+        const done3=itemTasks.filter(t=>t.status==='green').length;
+        const pct3=Math.round(done3/itemTasks.length*100);
+        html+=`<tr class="tl3"><td colspan="6" style="padding:6px 13px 6px 42px">
+          <span class="chev${o3?' open':''}" onclick="toggleExp('${k3}')">▶</span>
+          ${esc(item.name)}
+          <span style="font-size:10px;color:var(--gray-400);margin-left:6px">${done3}/${itemTasks.length}</span>
+          <div class="prog-bg" style="margin-left:6px"><div class="prog-fill" style="width:${pct3}%"></div></div>
+          <button class="btn btn-sm" style="margin-left:auto;font-size:10px" onclick="openBulkStatus('${item.id}','${sub.id}','${cat.id}')">Bulk</button>
+        </td></tr>`;
+
+        if(!o3)return;
+        itemTasks.forEach(t=>{
+          const inst=instById(t.instId);
+          const over=t.deadline&&t.deadline<today&&t.status!=='green';
+          const nk=state.kommentarer.filter(k=>k.opgaveId===t.id).length;
+          html+=`<tr class="tl-inst cr" onclick="openEditSingle('${t.id}')">
+            <td style="padding-left:58px">${esc(inst?inst.name:'–')}<span class="sp" style="margin-left:5px">${esc(inst?inst.type:'')}</span></td>
+            <td style="font-size:11px;color:var(--gray-600)">${esc(t.owner||'–')}</td>
+            <td>${sbadge(t.status)}</td>
+            <td style="font-size:10px;${over?'color:var(--red);font-weight:600':'color:var(--gray-400)'}">${t.deadline||'–'}</td>
+            <td>${nk?`<span class="badge b-gray">💬 ${nk}</span>`:''}</td>
+            <td style="font-size:10px;color:var(--gray-400);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:150px">${esc(t.note||'')}</td>
+          </tr>`;
+        });
+      });
+    });
+  });
+
+  if(!html)html='<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--gray-400)">Ingen opgaver matcher filteret</td></tr>';
+  document.getElementById('task-tbody').innerHTML=html;
+}
+
+function toggleExp(key){expanded[key]=expanded[key]===false;renderTasks()}
+function jumpToSkabelon(sid){
+  const sk=findSkabelon(sid);if(!sk)return;
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-tasks').classList.add('active');
+  document.getElementById('page-title').textContent='Opgaver';
+  expanded['l1_'+sk.cat.id]=true;expanded['l2_'+sk.sub.id]=true;expanded['l3_'+sk.item.id]=true;
+  document.getElementById('tq').value='';renderTasks();
+  setTimeout(()=>{document.querySelectorAll('#task-tbody tr').forEach(r=>{if(r.textContent.includes(sk.item.name))r.scrollIntoView({behavior:'smooth',block:'center'})})},100);
+}
+
+// ─── KANBAN ───────────────────────────────────────────────────────
+function renderKanban(){
+  const q=(document.getElementById('kq')||{value:''}).value.toLowerCase();
+  const fc=(document.getElementById('kfc')||{value:''}).value;
+
+  // group by skabelon (niveau 3)
+  const skabeloner=[];
+  state.cats.forEach(cat=>{
+    if(fc&&cat.id!==fc)return;
+    (cat.subs||[]).forEach(sub=>{
+      (sub.items||[]).forEach(item=>{
+        const tasks=state.tasks.filter(t=>t.skabelonId===item.id);
+        if(!tasks.length)return;
+        if(q&&!item.name.toLowerCase().includes(q)&&!sub.name.toLowerCase().includes(q)&&!cat.name.toLowerCase().includes(q))return;
+        const gr=tasks.filter(t=>t.status==='green').length;
+        const ye=tasks.filter(t=>t.status==='yellow').length;
+        const re=tasks.filter(t=>t.status==='red').length;
+        const total=tasks.length;
+        const pctGr=Math.round(gr/total*100);
+        const pctYe=Math.round(ye/total*100);
+        const dominant=gr===total?'green':(ye>0||gr>0)?'yellow':'red';
+        const deadline=tasks.filter(t=>t.deadline&&t.status!=='green').map(t=>t.deadline).sort()[0]||null;
+        const owner=[...new Set(tasks.map(t=>t.owner).filter(Boolean))][0]||'';
+        skabeloner.push({cat,sub,item,tasks,gr,ye,re,total,pctGr,pctYe,dominant,deadline,owner});
+      });
+    });
+  });
+
+  const statusCols={
+    red:{label:'Ikke påbegyndt',dot:'var(--red)'},
+    yellow:{label:'I gang',dot:'var(--amber)'},
+    green:{label:'Afsluttet',dot:'var(--green)'},
+  };
+
+  let html='';
+  Object.entries(statusCols).forEach(([status,col])=>{
+    const colItems=skabeloner.filter(s=>s.dominant===status);
+    html+=`<div class="k-col">
+      <div class="k-col-hdr">
+        <div class="k-col-title"><div class="k-dot" style="background:${col.dot}"></div>${col.label}</div>
+        <span class="k-count">${colItems.length}</span>
+      </div>
+      <div class="k-col-cards">`;
+
+    colItems.forEach(s=>{
+      const pctRe=Math.round(s.re/s.total*100);
+      const pctYe=Math.round(s.ye/s.total*100);
+      const pctGr=100-pctRe-pctYe;
+      const today=new Date().toISOString().slice(0,10);
+      const over=s.deadline&&s.deadline<today;
+
+      html+=`<div class="k-card" style="padding:0;overflow:hidden;border:1px solid var(--gray-200)" onclick="jumpToSkabelon('${s.item.id}')">
+        <!-- statusbar baggrund -->
+        <div style="display:flex;width:100%;height:100%;min-height:80px;position:relative">
+          ${pctRe>0?`<div style="width:${pctRe}%;background:rgba(192,57,43,0.15);flex-shrink:0"></div>`:''}
+          ${pctYe>0?`<div style="width:${pctYe}%;background:rgba(183,119,13,0.12);flex-shrink:0"></div>`:''}
+          ${pctGr>0?`<div style="width:${pctGr}%;background:rgba(45,106,45,0.13);flex-shrink:0"></div>`:''}
+          <!-- indhold ovenpå -->
+          <div style="position:absolute;inset:0;padding:10px 12px;display:flex;flex-direction:column;justify-content:space-between">
+            <div>
+              <div style="font-size:12px;font-weight:600;color:var(--gray-900);margin-bottom:1px">${esc(s.item.name)}</div>
+              <div style="font-size:10px;color:var(--gray-600)">${esc(s.cat.name)} › ${esc(s.sub.name)}</div>
+            </div>
+            <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-top:8px">
+              <div style="display:flex;gap:10px;font-size:10px;font-weight:600">
+                ${s.re>0?`<span style="color:var(--red)">✗ ${s.re}</span>`:''}
+                ${s.ye>0?`<span style="color:var(--amber)">→ ${s.ye}</span>`:''}
+                ${s.gr>0?`<span style="color:var(--green)">✓ ${s.gr}</span>`:''}
+              </div>
+              <div style="display:flex;gap:7px;font-size:10px;color:var(--gray-400);align-items:center">
+                ${s.owner?`<span>👤 ${esc(s.owner)}</span>`:''}
+                ${s.deadline?`<span style="${over?'color:var(--red);font-weight:600':''}">📅 ${s.deadline}</span>`:''}
+                <span style="font-size:11px;font-weight:600;color:var(--gray-600)">${Math.round(s.gr/s.total*100)}%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    });
+
+    if(!colItems.length)html+=`<div style="font-size:11px;color:var(--gray-400);padding:8px 0">Ingen opgaver</div>`;
+    html+='</div></div>';
+  });
+
+  document.getElementById('kanban-board').innerHTML=html;
+}
+
+// ─── DEADLINES ───────────────────────────────────────────────────
+function renderDeadlines(){
+  const today=new Date();today.setHours(0,0,0,0);
+  const todayStr=today.toISOString().slice(0,10);
+  function daysDiff(dl){return Math.ceil((new Date(dl)-today)/86400000)}
+
+  const buckets=[
+    {label:'Overskredet',color:'var(--red)',test:t=>t.deadline&&t.deadline<todayStr&&t.status!=='green'},
+    {label:'I dag eller i morgen',color:'var(--red)',test:t=>t.deadline&&t.deadline>=todayStr&&daysDiff(t.deadline)<=1&&t.status!=='green'},
+    {label:'Inden for 7 dage',color:'var(--amber)',test:t=>t.deadline&&daysDiff(t.deadline)>1&&daysDiff(t.deadline)<=7&&t.status!=='green'},
+    {label:'Inden for 30 dage',color:'var(--amber)',test:t=>t.deadline&&daysDiff(t.deadline)>7&&daysDiff(t.deadline)<=30&&t.status!=='green'},
+    {label:'Inden for 90 dage',color:'var(--blue)',test:t=>t.deadline&&daysDiff(t.deadline)>30&&daysDiff(t.deadline)<=90&&t.status!=='green'},
+    {label:'Mere end 90 dage',color:'var(--gray-400)',test:t=>t.deadline&&daysDiff(t.deadline)>90&&t.status!=='green'},
+    {label:'Afsluttet',color:'var(--green)',test:t=>t.status==='green'},
+    {label:'Ingen deadline',color:'var(--gray-400)',test:t=>!t.deadline&&t.status!=='green'},
+  ];
+
+  let html='';
+  buckets.forEach(b=>{
+    const tasks=state.tasks.filter(b.test);
+    if(!tasks.length)return;
+    const groups={};
+    tasks.forEach(t=>{if(!groups[t.skabelonId])groups[t.skabelonId]=[];groups[t.skabelonId].push(t)});
+    let rows='';
+    Object.entries(groups).forEach(([sid,gtasks])=>{
+      const sk=findSkabelon(sid);
+      const gr2=gtasks.filter(t=>t.status==='green').length;
+      const pctGr=Math.round(gr2/gtasks.length*100);
+      const pctYe=Math.round(gtasks.filter(t=>t.status==='yellow').length/gtasks.length*100);
+      const deadlines=[...new Set(gtasks.map(t=>t.deadline).filter(Boolean))].sort();
+      const dl=deadlines.length===1?deadlines[0]:deadlines.length>1?deadlines[0]+' – '+deadlines[deadlines.length-1]:'';
+      const owner=[...new Set(gtasks.map(t=>t.owner).filter(Boolean))].slice(0,2).join(', ');
+      rows+=`<div class="dl-row" onclick="jumpToSkabelon('${sid}')">
+        <div style="flex:1;min-width:0">
+          <div style="font-size:12px;font-weight:500">${esc(sk?sk.item.name:'–')}</div>
+          <div style="font-size:10px;color:var(--gray-400);margin-top:1px">${esc(sk?sk.cat.name+' › '+sk.sub.name:'')}${owner?' · 👤 '+esc(owner):''}${dl?' · 📅 '+esc(dl):''}</div>
+        </div>
+        <div style="width:110px;flex-shrink:0">
+          <div style="display:flex;border-radius:4px;overflow:hidden;height:7px;background:var(--gray-200);margin-bottom:3px">
+            ${pctGr>0?`<div style="width:${pctGr}%;background:var(--green)"></div>`:''}
+            ${pctYe>0?`<div style="width:${pctYe}%;background:var(--amber)"></div>`:''}
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--gray-400)">
+            <span>${gr2}/${gtasks.length}</span><span>${pctGr}%</span>
+          </div>
+        </div>
+      </div>`;
+    });
+    html+=`<div class="dl-bucket">
+      <div class="dl-bucket-hdr">
+        <div style="display:flex;align-items:center;gap:7px">
+          <div style="width:8px;height:8px;border-radius:50%;background:${b.color}"></div>
+          <span style="font-size:13px;font-weight:600;color:${b.color}">${b.label}</span>
+        </div>
+        <span style="font-size:11px;color:var(--gray-400)">${tasks.length} opgaver · ${Object.keys(groups).length} kategorier</span>
+      </div>
+      ${rows}
+    </div>`;
+  });
+  document.getElementById('deadline-groups').innerHTML=html||'<div style="text-align:center;padding:3rem;color:var(--gray-400)">Ingen opgaver endnu</div>';
+}
+
+// ─── INSTITUTIONER ───────────────────────────────────────────────
+function renderInstitutions(){
+  const q=(document.getElementById('iq')||{value:''}).value.toLowerCase();
+  const tp=(document.getElementById('ift')||{value:''}).value;
+  let html='';
+  INSTS.filter(i=>(!q||i.name.toLowerCase().includes(q)||i.type.toLowerCase().includes(q)||i.kommune.toLowerCase().includes(q))&&(!tp||i.type===tp))
+    .forEach(inst=>{
+      const it=state.tasks.filter(t=>t.instId===inst.id);
+      const gr=it.filter(t=>t.status==='green').length,ye=it.filter(t=>t.status==='yellow').length,re=it.filter(t=>t.status==='red').length;
+      const pct=it.length?Math.round(gr/it.length*100):0;
+      html+=`<tr class="cr" onclick="filterToInst('${inst.id}','${esc(inst.name)}')">
+        <td style="padding-left:13px;font-weight:500">${esc(inst.name)}</td>
+        <td><span class="sp">${esc(inst.type)}</span></td>
+        <td style="font-size:10px;color:var(--gray-400)">${esc(inst.kommune)}</td>
+        <td><div style="display:flex;align-items:center;gap:6px"><div class="prog-bg"><div class="prog-fill" style="width:${pct}%"></div></div><span style="font-size:10px;color:var(--gray-400)">${pct}%</span></div></td>
+        <td><span class="badge b-g">${gr}</span></td><td><span class="badge b-a">${ye}</span></td><td><span class="badge b-r">${re}</span></td>
+        <td style="font-size:10px;color:var(--gray-400)">${it.length} opgaver →</td>
+      </tr>`;
+    });
+  if(!html)html='<tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--gray-400)">Ingen resultater</td></tr>';
+  document.getElementById('inst-tbody').innerHTML=html;
+  const ft=document.getElementById('ift');
+  if(ft&&!ft.querySelector('option[value="Privat"]')){
+    const types=[...new Set(INSTS.map(i=>i.type))].sort();
+    ft.innerHTML='<option value="">Alle typer</option>'+types.map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join('');
+  }
+}
+function filterToInst(instId,name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-tasks').classList.add('active');
+  document.getElementById('page-title').textContent='Opgaver – '+name;
+  document.getElementById('tq').value=name;renderTasks();
+}
+
+// ─── AKTIVITET ───────────────────────────────────────────────────
+function renderActivity(){
+  const akt=state.aktivitet;
+  document.getElementById('full-activity').innerHTML=akt.length?
+    akt.map(a=>`<div class="activity-item"><div class="a-dot ${a.type==='comment'?'c':a.type==='green'?'':'a'}"></div>
+      <div class="a-body"><div><span class="a-who">${esc(a.forfatter)}</span><span class="a-time">${timeAgo(a.oprettet)}</span></div>
+      <div class="a-text">${esc(a.tekst)}</div></div></div>`).join(''):
+    '<div style="font-size:12px;color:var(--gray-400);padding:8px 0">Ingen aktivitet endnu</div>';
+}
+
+// ─── PLANLÆGNING ─────────────────────────────────────────────────
+function renderPlanning(){
+  let html='';
+  state.cats.forEach(cat=>{
+    const catTaskCount=state.tasks.filter(t=>{const sk=findSkabelon(t.skabelonId);return sk&&sk.cat.id===cat.id}).length;
+    html+=`<div class="pl-group">
+      <div class="pl-l1">
+        <span style="font-size:15px">📁</span>
+        <span class="pl-l1-name">${esc(cat.name)}</span>
+        ${catTaskCount?`<span class="sp">${catTaskCount} opgaver</span>`:''}
+        <button class="btn btn-sm" style="font-size:11px" onclick="openPlEdit('l1','${cat.id}',null,null)">Omdøb</button>
+        <button class="btn btn-sm btn-r" style="font-size:11px" onclick="deletePl('l1','${cat.id}',null,null)">Slet</button>
+      </div>
+      <div id="subs_${cat.id}"
+        ondragover="event.preventDefault();event.currentTarget.querySelectorAll('.pl-l2').forEach(r=>r.classList.remove('drag-over'));const el=event.target.closest('.pl-l2');if(el)el.classList.add('drag-over')"
+        ondragleave="event.currentTarget.querySelectorAll('.pl-l2').forEach(r=>r.classList.remove('drag-over'))"
+        ondrop="dropSub(event,'${cat.id}')">`;
+
+    (cat.subs||[]).forEach(sub=>{
+      const subTaskCount=state.tasks.filter(t=>{const sk=findSkabelon(t.skabelonId);return sk&&sk.sub.id===sub.id}).length;
+      html+=`<div class="pl-l2" draggable="true" data-subid="${sub.id}" data-l1id="${cat.id}"
+          ondragstart="dragStartSub(event,'${sub.id}','${cat.id}')"
+          ondragend="document.querySelectorAll('.pl-l2').forEach(r=>{r.classList.remove('drag-over','dragging')})">
+          <span style="color:var(--gray-400);cursor:grab;font-size:13px">⠿</span>
+          <span class="pl-l2-name">${esc(sub.name)}</span>
+          ${subTaskCount?`<span class="sp">${subTaskCount} opgaver</span>`:''}
+          <button class="btn btn-sm" style="font-size:11px" onclick="openPlEdit('l2','${cat.id}','${sub.id}',null)">Omdøb</button>
+          <button class="btn btn-sm btn-r" style="font-size:11px" onclick="deletePl('l2','${cat.id}','${sub.id}',null)">Slet</button>
+        </div>`;
+
+      (sub.items||[]).forEach(item=>{
+        const itemTaskCount=state.tasks.filter(t=>t.skabelonId===item.id).length;
+        html+=`<div class="pl-l3">
+          <span style="color:var(--gray-300);font-size:12px;margin-right:4px">▸</span>
+          <span style="flex:1">${esc(item.name)}</span>
+          ${itemTaskCount?`<span class="sp">${itemTaskCount} opgaver</span>`:''}
+          <button class="btn btn-sm" style="font-size:11px" onclick="openPlEdit('l3','${cat.id}','${sub.id}','${item.id}')">Omdøb</button>
+          <button class="btn btn-sm btn-r" style="font-size:11px" onclick="deletePl('l3','${cat.id}','${sub.id}','${item.id}')">Slet</button>
+        </div>`;
+      });
+
+      html+=`<div class="pl-add l3" onclick="openAddCat('${cat.id}','${sub.id}')">
+        <span>+</span> Opgave under ${esc(sub.name)}
+      </div>`;
+    });
+
+    html+=`<div class="pl-add l2" onclick="openAddCat('${cat.id}',null)">
+        <span>+</span> Underkategori
+      </div>
+    </div></div>`;
+  });
+  if(!state.cats.length)html='<div style="font-size:13px;color:var(--gray-400);padding:16px 0">Ingen kategorier endnu.</div>';
+  document.getElementById('planning-tree').innerHTML=html;
+}
+
+function dragStartSub(event,subId,fromCatId){
+  dragSubId=subId;dragFromCatId=fromCatId;
+  event.dataTransfer.effectAllowed='move';
+  setTimeout(()=>event.target.closest('.pl-l2').classList.add('dragging'),0);
+}
+async function dropSub(event,toCatId){
+  event.preventDefault();
+  document.querySelectorAll('.pl-l2').forEach(r=>r.classList.remove('drag-over','dragging'));
+  if(!dragSubId||dragFromCatId===toCatId)return;
+  const fromCat=findL1(dragFromCatId),toCat=findL1(toCatId);
+  const sub=(fromCat?(fromCat.subs||[]):[]).find(s=>s.id===dragSubId);
+  if(!fromCat||!toCat||!sub)return;
+  if(!confirm('Flyt "'+sub.name+'" fra "'+fromCat.name+'" til "'+toCat.name+'"?'))return;
+  try{await sbPatch('kategorier',dragSubId,{parent_id:toCatId});toast('"'+sub.name+'" flyttet');await syncNow()}
+  catch(e){toast('Fejl: '+e.message,true)}
+  dragSubId=null;dragFromCatId=null;
+}
+
+// ─── PLANLÆGNING CRUD ────────────────────────────────────────────
+let plCtx={niveau:null,l1id:null,l2id:null};
+function openAddCat(l1id,l2id){
+  plCtx={niveau:l1id?l2id?3:2:1,l1id,l2id};
+  const labels={1:'Ny kategori',2:'Ny underkategori',3:'Ny opgave'};
+  document.getElementById('pl-title').textContent=labels[plCtx.niveau];
+  document.getElementById('pl-name').value='';
+  const pi=document.getElementById('pl-parent-info');
+  if(l1id){
+    pi.style.display='block';
+    const cat=findL1(l1id);const sub=l2id?findL2(l1id,l2id):null;
+    pi.textContent='Under: '+(sub?sub.name:cat?cat.name:'');
+  }else pi.style.display='none';
+  document.getElementById('pl-modal').classList.add('open');
+}
+async function savePl(){
+  const name=document.getElementById('pl-name').value.trim();if(!name)return;
+  const id='c'+Date.now();
+  const niveau=plCtx.niveau;
+  const parent_id=niveau===3?plCtx.l2id:niveau===2?plCtx.l1id:'';
+  closeModal('pl-modal');
+  try{await sbPost('kategorier',{id,niveau,navn:name,parent_id,oprettet:new Date().toISOString()});toast('Tilføjet');await syncNow()}
+  catch(e){toast('Fejl: '+e.message,true)}
+}
+
+let plEditRef={niveau:null,l1id:null,l2id:null,l3id:null};
+function openPlEdit(niveau,l1id,l2id,l3id){
+  plEditRef={niveau,l1id,l2id,l3id};
+  let node=null;
+  if(niveau==='l1')node=findL1(l1id);
+  else if(niveau==='l2')node=findL2(l1id,l2id);
+  else if(niveau==='l3')node=l3id?findL3(l2id,l3id):null;
+  if(!node)return;
+  document.getElementById('pl-edit-name').value=node.name;
+  document.getElementById('pl-edit-modal').classList.add('open');
+}
+async function savePlEdit(){
+  const name=document.getElementById('pl-edit-name').value.trim();if(!name)return;
+  const {niveau,l1id,l2id,l3id}=plEditRef;
+  const id=niveau==='l1'?l1id:niveau==='l2'?l2id:l3id;
+  closeModal('pl-edit-modal');
+  try{await sbPatch('kategorier',id,{navn:name});toast('Opdateret');await syncNow()}
+  catch(e){toast('Fejl: '+e.message,true)}
+}
+async function deletePl(niveau,l1id,l2id,l3id){
+  if(!confirm('Slet? Opgaver i databasen slettes ikke.'))return;
+  const id=niveau==='l1'?l1id:niveau==='l2'?l2id:l3id;
+  try{
+    if(niveau==='l1'){await sbDelete('kategorier','parent_id=eq.'+l1id)}
+    if(niveau==='l2'){await sbDelete('kategorier','parent_id=eq.'+l2id)}
+    await sbDelete('kategorier','id=eq.'+id);
+    toast('Slettet');await syncNow();
+  }catch(e){toast('Fejl: '+e.message,true)}
+}
+
+// ─── NY OPGAVE ───────────────────────────────────────────────────
+function populateInstSelect(){
+  const el=document.getElementById('tm-inst');
+  el.innerHTML='<option value="">Vælg institution...</option>'+INSTS.map(i=>`<option value="${i.id}">${esc(i.name)}</option>`).join('');
+}
+function refreshL1Modal(val){
+  const el=document.getElementById('tm-l1');
+  const cur=val!==undefined?val:el.value;
+  el.innerHTML='<option value="">Vælg...</option>'+state.cats.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');
+  el.value=cur;
+}
+function tmL1(){
+  const cat=findL1(document.getElementById('tm-l1').value);
+  const l2=document.getElementById('tm-l2');
+  if(!cat){l2.innerHTML='<option value="">Vælg kategori først...</option>';document.getElementById('tm-l3').innerHTML='<option value="">Vælg underkategori først...</option>';return}
+  l2.innerHTML='<option value="">Vælg...</option>'+(cat.subs||[]).map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('');
+  document.getElementById('tm-l3').innerHTML='<option value="">Vælg underkategori først...</option>';
+}
+function tmL2(){
+  const l1id=document.getElementById('tm-l1').value;
+  const sub=findL2(l1id,document.getElementById('tm-l2').value);
+  const l3=document.getElementById('tm-l3');
+  if(!sub){l3.innerHTML='<option value="">Vælg underkategori først...</option>';return}
+  l3.innerHTML='<option value="">Vælg...</option>'+(sub.items||[]).map(i=>`<option value="${i.id}">${esc(i.name)}</option>`).join('');
+}
+function tmScope(){
+  const sc=document.getElementById('tm-scope').value;
+  document.getElementById('tm-inst-wrap').style.display=sc==='inst'?'block':'none';
+  const prev=document.getElementById('scope-preview');
+  if(sc==='inst'){prev.style.display='none';document.getElementById('tm-save-btn').textContent='Gem opgave';return}
+  const n=instsForScope(sc,'').length;
+  prev.style.display='block';
+  prev.textContent='Opretter '+n+' individuelle opgaver – én per '+(sc==='all'?'institution':sc+' institution')+'.';
+  document.getElementById('tm-save-btn').textContent='Opret '+n+' opgaver';
+}
+function openAddTask(){
+  document.getElementById('tm-title').textContent='Tilføj opgave';
+  refreshL1Modal('');
+  document.getElementById('tm-l2').innerHTML='<option value="">Vælg kategori først...</option>';
+  document.getElementById('tm-l3').innerHTML='<option value="">Vælg underkategori først...</option>';
+  document.getElementById('tm-note').value='';
+  refreshOwnerDropdown();
+  document.getElementById('tm-owner').value=CURRENT_USER?CURRENT_USER.navn:'';
+  document.getElementById('tm-scope').value='all';
+  document.getElementById('tm-status').value='red';
+  document.getElementById('tm-deadline').value='';
+  document.getElementById('tm-inst-wrap').style.display='none';
+  tmScope();
+  document.getElementById('task-modal').classList.add('open');
+}
+async function saveTask(){
+  const skabelonId=document.getElementById('tm-l3').value;
+  if(!skabelonId){toast('Vælg kategori, underkategori og opgave',true);return}
+  const sc=document.getElementById('tm-scope').value;
+  const instId=document.getElementById('tm-inst').value;
+  if(sc==='inst'&&!instId){toast('Vælg en institution',true);return}
+  const owner=document.getElementById('tm-owner').value.trim();
+  const status=document.getElementById('tm-status').value;
+  const deadline=document.getElementById('tm-deadline').value||null;
+  const note=document.getElementById('tm-note').value.trim();
+  const now=new Date().toISOString();
+  const insts=instsForScope(sc,instId);
+  const rows=insts.map(i=>({id:'t'+Date.now()+Math.random().toString(36).slice(2,5),skabelon_id:skabelonId,inst_id:i.id,owner,status,deadline,note,oprettet:now,sidst_aendret:now,sidst_aendret_af:BRUGER}));
+  closeModal('task-modal');
+  toast('Opretter '+rows.length+' opgave'+(rows.length!==1?'r':'')+'...');
+  try{
+    await sbPostBatch('opgaver',rows);
+    const sk=findSkabelon(skabelonId);
+    await logAkt('add',BRUGER+' oprettede '+rows.length+' opgave'+(rows.length!==1?'r':'')+' – '+(sk?sk.item.name:''));
+    toast(rows.length+' opgave'+(rows.length!==1?'r':'')+' oprettet');await syncNow();
+  }catch(e){toast('Fejl: '+e.message,true)}
+}
+
+// ─── REDIGER ENKELT ──────────────────────────────────────────────
+function openEditSingle(id){
+  const t=state.tasks.find(x=>x.id===id);if(!t)return;
+  editTaskId=id;
+  const inst=instById(t.instId);
+  const sk=findSkabelon(t.skabelonId);
+  document.getElementById('em-title').textContent=sk?sk.item.name:'Opgave';
+  document.getElementById('em-inst').textContent=(inst?inst.name:'')+(sk?' · '+sk.cat.name+' › '+sk.sub.name:'');
+  refreshOwnerDropdown();
+  document.getElementById('em-owner').value=t.owner||'';
+  document.getElementById('em-status').value=t.status;
+  document.getElementById('em-deadline').value=t.deadline||'';
+  document.getElementById('em-note').value=t.note||'';
+  renderComments(id);
+  document.getElementById('edit-modal').classList.add('open');
+}
+async function saveEditTask(){
+  const oldTask=state.tasks.find(x=>x.id===editTaskId);
+  const newStatus=document.getElementById('em-status').value;
+  const data={owner:document.getElementById('em-owner').value.trim(),status:newStatus,deadline:document.getElementById('em-deadline').value||null,note:document.getElementById('em-note').value.trim(),sidst_aendret:new Date().toISOString(),sidst_aendret_af:BRUGER};
+  closeModal('edit-modal');
+  try{
+    await sbPatch('opgaver',editTaskId,data);
+    const inst=instById(oldTask?oldTask.instId:'');
+    const sk=findSkabelon(oldTask?oldTask.skabelonId:'');
+    const labels={green:'afsluttet',yellow:'i gang',red:'ikke påbegyndt'};
+    await logAkt(newStatus,BRUGER+' markerede '+(inst?inst.name:'')+(sk?' – '+sk.item.name:'')+' som '+labels[newStatus],editTaskId);
+    toast('Opdateret');await syncNow();
+  }catch(e){toast('Fejl: '+e.message,true)}
+}
+async function delTaskEdit(){
+  if(!confirm('Slet opgave?'))return;
+  closeModal('edit-modal');
+  try{await sbDelete('opgaver','id=eq.'+editTaskId);toast('Slettet');await syncNow()}
+  catch(e){toast('Fejl: '+e.message,true)}
+}
+
+// ─── KOMMENTARER ─────────────────────────────────────────────────
+function renderComments(taskId){
+  const komm=state.kommentarer.filter(k=>k.opgaveId===taskId);
+  document.getElementById('comment-list').innerHTML=komm.length?
+    komm.map(k=>`<div class="comment-item"><div><span class="comment-who">${esc(k.forfatter)}</span><span class="comment-time">${timeAgo(k.oprettet)}</span></div><div class="comment-text">${esc(k.tekst)}</div></div>`).join(''):
+    '<div style="font-size:12px;color:var(--gray-400);padding:6px 0">Ingen kommentarer endnu</div>';
+  document.getElementById('comment-text').value='';
+}
+async function addComment(){
+  const tekst=document.getElementById('comment-text').value.trim();if(!tekst)return;
+  try{
+    await sbPost('kommentarer',{id:'k'+Date.now(),opgave_id:editTaskId,tekst,forfatter:BRUGER||'Anonym',oprettet:new Date().toISOString()});
+    const t=state.tasks.find(x=>x.id===editTaskId);
+    const inst=instById(t?t.instId:'');
+    const sk=findSkabelon(t?t.skabelonId:'');
+    await logAkt('comment',BRUGER+' kommenterede på '+(inst?inst.name:'')+(sk?' – '+sk.item.name:'')+': "'+tekst.slice(0,50)+(tekst.length>50?'...':'')+'"',editTaskId);
+    await syncNow();renderComments(editTaskId);toast('Kommentar tilføjet');
+  }catch(e){toast('Fejl: '+e.message,true)}
+}
+
+// ─── BULK STATUS ─────────────────────────────────────────────────
+function openBulkStatus(l3id,l2id,l1id){
+  bulkL1=l1id;bulkL2=l2id;bulkL3=l3id;
+  const item=findL3(l2id,l3id);
+  const tasks=state.tasks.filter(t=>t.skabelonId===l3id);
+  const gr=tasks.filter(t=>t.status==='green').length,ye=tasks.filter(t=>t.status==='yellow').length,re=tasks.filter(t=>t.status==='red').length;
+  document.getElementById('bulk-bar-wrap').innerHTML=`<div class="bulk-bar">
+    <strong>${esc(item?item.name:'')}</strong> – ${tasks.length} institutioner:
+    <span class="badge b-g">${gr}</span><span class="badge b-a">${ye}</span><span class="badge b-r">${re}</span>
+    <span style="margin-left:4px">Sæt alle til:</span>
+    <button class="btn btn-sm" style="background:var(--green);color:#fff;border-color:var(--green)" onclick="bulkSet('green')">Afsluttet</button>
+    <button class="btn btn-sm" style="background:var(--amber-light);color:var(--amber);border-color:var(--amber)" onclick="bulkSet('yellow')">I gang</button>
+    <button class="btn btn-sm" style="background:var(--red-light);color:var(--red);border-color:var(--red)" onclick="bulkSet('red')">Ikke påbegyndt</button>
+    ${BULK_DELETE?`<button class="btn btn-sm" style="background:var(--red);color:#fff;border-color:var(--red);margin-left:4px" onclick="bulkDelete()">🗑 Slet alle</button>`:''}
+    <button class="btn btn-sm" style="margin-left:auto" onclick="document.getElementById('bulk-bar-wrap').innerHTML=''">✕</button>
+  </div>`;
+}
+async function bulkSet(status){
+  const tasks=state.tasks.filter(t=>t.skabelonId===bulkL3);
+  const labels={green:'afsluttet',yellow:'i gang',red:'ikke påbegyndt'};
+  if(!confirm('Sæt alle '+tasks.length+' opgaver til "'+labels[status]+'"?'))return;
+  document.getElementById('bulk-bar-wrap').innerHTML='';
+  toast('Opdaterer '+tasks.length+' opgaver...');
+  const now=new Date().toISOString();
+  try{
+    for(const t of tasks)await sbPatch('opgaver',t.id,{status,sidst_aendret:now,sidst_aendret_af:BRUGER});
+    const item=findL3(bulkL2,bulkL3);
+    await logAkt(status,BRUGER+' bulk-opdaterede '+(item?item.name:'')+ ' ('+tasks.length+' inst.) til '+labels[status]);
+    toast(tasks.length+' opgaver opdateret');await syncNow();
+  }catch(e){toast('Fejl: '+e.message,true)}
+}
+async function bulkDelete(){
+  const tasks=state.tasks.filter(t=>t.skabelonId===bulkL3);
+  const item=findL3(bulkL2,bulkL3);
+  if(!confirm('Slet alle '+tasks.length+' opgaver under "'+((item||{}).name||'')+'"?\nKan ikke fortrydes.'))return;
+  document.getElementById('bulk-bar-wrap').innerHTML='';
+  try{
+    await sbDelete('opgaver','skabelon_id=eq.'+bulkL3);
+    await logAkt('delete',BRUGER+' slettede alle opgaver under '+((item||{}).name||''));
+    toast(tasks.length+' opgaver slettet');await syncNow();
+  }catch(e){toast('Fejl: '+e.message,true)}
+}
+</script>
+</body>
+</html>
