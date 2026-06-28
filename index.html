@@ -810,10 +810,6 @@ async function changePassword(){
     toast('Password skiftet');
   }catch(e){pwErr.textContent='Fejl: '+e.message;pwErr.style.display='block'}
 }
-  if(!confirm(aktiv?'Deaktiver denne bruger?':'Aktiver denne bruger?'))return;
-  try{await sbPatch('brugere',id,{aktiv:!aktiv});toast('Opdateret');await syncNow();renderUserList()}
-  catch(e){toast('Fejl: '+e.message,true)}
-}
 
 function refreshOwnerDropdown(){
   const aktive=state.brugere.filter(u=>u.aktiv);
