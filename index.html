@@ -391,6 +391,17 @@ textarea.inp{height:52px;resize:vertical}
       </div>
       <div id="user-list"></div>
     </div>
+    <div id="change-pw-section" style="display:none;margin-top:20px;padding-top:16px;border-top:1px solid var(--gray-200)">
+      <div style="font-size:13px;font-weight:600;margin-bottom:10px">Skift password</div>
+      <label class="lbl">Nuværende password</label>
+      <input class="inp" id="pw-current" type="password" placeholder="••••••••">
+      <label class="lbl">Nyt password</label>
+      <input class="inp" id="pw-new" type="password" placeholder="••••••••">
+      <label class="lbl">Gentag nyt password</label>
+      <input class="inp" id="pw-repeat" type="password" placeholder="••••••••">
+      <div id="pw-err" style="display:none;background:var(--red-light);color:var(--red);padding:8px 12px;border-radius:7px;font-size:12px;margin-top:8px"></div>
+      <button class="btn btn-g btn-sm" style="margin-top:10px" onclick="changePassword()">Skift password</button>
+    </div>
   </div>
 </div>
 
@@ -780,6 +791,30 @@ async function toggleUserAktiv(id,aktiv){
   catch(e){toast('Fejl: '+e.message,true)}
 }
 
+async function changePassword(){
+  const cur=document.getElementById('pw-current').value;
+  const nw=document.getElementById('pw-new').value;
+  const rep=document.getElementById('pw-repeat').value;
+  const pwErr=document.getElementById('pw-err');
+  pwErr.style.display='none';
+  if(!cur||!nw||!rep){pwErr.textContent='Udfyld alle felter';pwErr.style.display='block';return}
+  if(nw!==rep){pwErr.textContent='De nye passwords er ikke ens';pwErr.style.display='block';return}
+  if(nw.length<6){pwErr.textContent='Password skal være mindst 6 tegn';pwErr.style.display='block';return}
+  try{
+    const curHash=await sha256(cur);
+    const rows=await sbGet('brugere','id=eq.'+CURRENT_USER.id+'&password_hash=eq.'+curHash);
+    if(!rows.length){pwErr.textContent='Nuværende password er forkert';pwErr.style.display='block';return}
+    const newHash=await sha256(nw);
+    await sbPatch('brugere',CURRENT_USER.id,{password_hash:newHash});
+    ['pw-current','pw-new','pw-repeat'].forEach(id=>document.getElementById(id).value='');
+    toast('Password skiftet');
+  }catch(e){pwErr.textContent='Fejl: '+e.message;pwErr.style.display='block'}
+}
+  if(!confirm(aktiv?'Deaktiver denne bruger?':'Aktiver denne bruger?'))return;
+  try{await sbPatch('brugere',id,{aktiv:!aktiv});toast('Opdateret');await syncNow();renderUserList()}
+  catch(e){toast('Fejl: '+e.message,true)}
+}
+
 function refreshOwnerDropdown(){
   const aktive=state.brugere.filter(u=>u.aktiv);
   ['tm-owner','em-owner'].forEach(id=>{
@@ -798,6 +833,11 @@ function prefillConfig(fromLogin){
   var sf=document.getElementById("cfg-sql-section");
   if(af)af.style.display=isAdmin?"block":"none";
   if(sf)sf.style.display=isAdmin?"block":"none";
+  var pwSection=document.getElementById("change-pw-section");
+  if(pwSection)pwSection.style.display=CURRENT_USER?"block":"none";
+  var pwErr=document.getElementById("pw-err");
+  if(pwErr)pwErr.style.display="none";
+  ["pw-current","pw-new","pw-repeat"].forEach(function(id){var el=document.getElementById(id);if(el)el.value="";});
   var urlEl=document.getElementById("cfg-url"),keyEl=document.getElementById("cfg-key");
   if(isAdmin&&urlEl)urlEl.value=SB_URL;
   if(isAdmin&&keyEl)keyEl.value=SB_KEY;
