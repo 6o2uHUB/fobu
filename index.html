@@ -630,7 +630,6 @@ insert into kategorier (id,niveau,navn,parent_id) values
 ('c5',1,'Systemopsætning',''),('c5a',2,'Lessor','c5'),('c5b',2,'SubIT','c5'),('c5c',2,'Business Central','c5')
 on conflict (id) do nothing;`;
 
-document.getElementById('sql-pre').textContent=SETUP_SQL;
 
 // ─── INSTITUTIONER ───────────────────────────────────────────────
 const INSTS=[
@@ -713,7 +712,6 @@ let expanded={},dragSubId=null,dragFromL1=null;
 let bulkL1=null,bulkL2=null,bulkL3=null;
 
 window.addEventListener('DOMContentLoaded',()=>{
-  document.getElementById('sql-pre').textContent=SETUP_SQL;
   populateInstSelect();
   // check saved session
   const saved=localStorage.getItem('fobu_session');
