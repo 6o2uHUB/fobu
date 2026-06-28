@@ -228,9 +228,10 @@ textarea.inp{height:52px;resize:vertical}
     <div class="nav-sec">Administration</div>
     <button class="nav-item" onclick="nav('activity',this)"><span class="nav-icon">📋</span>Aktivitetslog</button>
     <button class="nav-item" onclick="nav('planning',this)"><span class="nav-icon">📁</span>Planlægning</button>
+    <button class="nav-item" onclick="nav('settings',this)"><span class="nav-icon">⚙</span>Indstillinger</button>
+    <button class="nav-item" id="nav-users-btn" onclick="nav('users',this)"><span class="nav-icon">👤</span>Brugere</button>
     <div class="nav-bottom">
       <button class="nav-item" onclick="syncNow()"><span class="nav-icon">↺</span>Synkroniser</button>
-      <button class="nav-item" onclick="openConfig()"><span class="nav-icon">⚙</span>Indstillinger</button>
       <div class="sync-row"><div class="sdot" id="sdot"></div><span id="slabel">Ikke forbundet</span></div>
     </div>
   </div>
@@ -238,7 +239,7 @@ textarea.inp{height:52px;resize:vertical}
   <div class="main">
     <div class="topbar">
       <h1 id="page-title">Overblik</h1>
-      <div id="topbar-user" style="display:flex;align-items:center;gap:8px;margin-left:auto;cursor:pointer" onclick="openConfig()">
+      <div id="topbar-user" style="display:flex;align-items:center;gap:8px;margin-left:auto;cursor:pointer" onclick="navToUsers()">
         <div id="topbar-avatar" style="width:28px;height:28px;border-radius:50%;background:var(--green-light);border:1.5px solid var(--green-badge);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--green)"></div>
         <span id="topbar-name" style="font-size:12px;font-weight:500;color:var(--gray-600)"></span>
       </div>
@@ -334,7 +335,64 @@ textarea.inp{height:52px;resize:vertical}
         </div>
       </div>
 
-      <!-- AKTIVITET -->
+      <!-- INDSTILLINGER -->
+      <div class="page" id="page-settings">
+        <div class="card" id="settings-admin-card" style="display:none">
+          <div class="card-hdr"><span class="card-title">Forbindelse</span></div>
+          <label class="lbl">Project URL</label>
+          <input class="inp" id="s-url" type="text" placeholder="https://xxxxxxxx.supabase.co">
+          <label class="lbl">Anon key (Legacy)</label>
+          <input class="inp" id="s-key" type="text" placeholder="eyJhbGciOi...">
+          <label class="lbl">Overtagelsesdato</label>
+          <input class="inp" id="s-date" type="date" value="2026-10-01">
+          <button class="btn btn-g btn-sm" style="margin-top:12px" onclick="saveSettings()">Gem forbindelse</button>
+        </div>
+        <div class="card" id="settings-sql-card" style="display:none">
+          <div class="card-hdr">
+            <span class="card-title">SQL-opsætning</span>
+            <button class="btn btn-sm" onclick="navigator.clipboard.writeText(SETUP_SQL).then(()=>toast('SQL kopieret'))">📋 Kopiér SQL</button>
+          </div>
+          <pre style="background:var(--gray-50);border:1px solid var(--gray-200);border-radius:8px;padding:11px;font-size:11px;overflow-x:auto;white-space:pre-wrap" id="s-sql"></pre>
+        </div>
+        <div class="card" id="settings-nonadmin-card" style="display:none">
+          <div style="font-size:13px;color:var(--gray-400);padding:8px 0">Du har ikke adgang til at ændre systemindstillinger.</div>
+        </div>
+      </div>
+
+      <!-- BRUGERE -->
+      <div class="page" id="page-users">
+        <div class="card">
+          <div class="card-hdr"><span class="card-title">Min konto</span></div>
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;padding:12px 14px;background:var(--gray-50);border-radius:8px">
+            <div id="pu-avatar" style="width:40px;height:40px;border-radius:50%;background:var(--green-light);border:2px solid var(--green-badge);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--green);flex-shrink:0"></div>
+            <div><div id="pu-name" style="font-size:14px;font-weight:600"></div><div id="pu-email" style="font-size:12px;color:var(--gray-400)"></div></div>
+            <div id="pu-role" style="margin-left:auto"></div>
+          </div>
+          <div style="font-size:13px;font-weight:600;margin-bottom:10px">Skift password</div>
+          <label class="lbl">Nuværende password</label>
+          <input class="inp" id="pw-current" type="password" placeholder="••••••••">
+          <label class="lbl">Nyt password</label>
+          <input class="inp" id="pw-new" type="password" placeholder="••••••••">
+          <label class="lbl">Gentag nyt password</label>
+          <input class="inp" id="pw-repeat" type="password" placeholder="••••••••">
+          <div id="pw-err" style="display:none;background:var(--red-light);color:var(--red);padding:8px 12px;border-radius:7px;font-size:12px;margin-top:8px"></div>
+          <button class="btn btn-g btn-sm" style="margin-top:10px" onclick="changePassword()">Skift password</button>
+        </div>
+        <div class="card">
+          <div class="card-hdr"><span class="card-title">Indstillinger</span></div>
+          <div style="display:flex;align-items:center;gap:10px;padding:10px 0">
+            <input type="checkbox" id="pu-bulk-delete" style="width:16px;height:16px;cursor:pointer;accent-color:var(--red)" onchange="BULK_DELETE=this.checked">
+            <label for="pu-bulk-delete" style="font-size:12px;color:var(--red);font-weight:500;cursor:pointer">Tillad sletning af opgaver via bulk-opdatering</label>
+          </div>
+        </div>
+        <div class="card" id="users-admin-card" style="display:none">
+          <div class="card-hdr">
+            <span class="card-title">Alle brugere</span>
+            <button class="btn btn-g btn-sm" onclick="openNewUser()">+ Ny bruger</button>
+          </div>
+          <div id="user-list"></div>
+        </div>
+      </div>
       <div class="page" id="page-activity">
         <div class="card">
           <div class="card-hdr"><span class="card-title">Alle aktiviteter</span><button class="btn btn-sm" onclick="syncNow()">↺</button></div>
@@ -355,55 +413,6 @@ textarea.inp{height:52px;resize:vertical}
 </div>
 
 <!-- INDSTILLINGER MODAL -->
-<div class="modal-bg" id="config-modal">
-  <div class="modal">
-    <h2>Indstillinger</h2>
-    <div id="cfg-admin-fields">
-    <p style="font-size:12px;color:var(--gray-600);margin-bottom:4px">Find under <strong>Settings → API Keys → Legacy anon</strong></p>
-    <label class="lbl">Project URL</label>
-    <input class="inp" id="cfg-url" type="text" placeholder="https://xxxxxxxx.supabase.co">
-    <label class="lbl">Anon key (Legacy)</label>
-    <input class="inp" id="cfg-key" type="text" placeholder="eyJhbGciOi...">
-    </div>
-    <label class="lbl">Overtagelsesdato</label>
-    <input class="inp" id="cfg-date" type="date" value="2026-10-01">
-    <div style="margin-top:14px;padding:12px 14px;background:var(--red-light);border:1px solid #f5c6c6;border-radius:8px;display:flex;align-items:center;gap:10px">
-      <input type="checkbox" id="cfg-bulk-delete" style="width:16px;height:16px;cursor:pointer;accent-color:var(--red)">
-      <label for="cfg-bulk-delete" style="font-size:12px;color:var(--red);font-weight:500;cursor:pointer">Tillad sletning af opgaver via bulk-opdatering</label>
-    </div>
-    <div id="cfg-sql-section">
-    <details style="margin-top:12px">
-      <summary style="font-size:12px;font-weight:600;cursor:pointer;color:var(--gray-600);display:flex;align-items:center;justify-content:space-between">
-        SQL-opsætning (kør én gang i Supabase SQL Editor)
-        <button class="btn btn-sm" style="font-size:11px;margin-left:10px" onclick="event.preventDefault();copySQL()">📋 Kopiér SQL</button>
-      </summary>
-      <pre id="sql-pre" style="background:var(--gray-50);border:1px solid var(--gray-200);border-radius:8px;padding:11px;font-size:11px;margin-top:7px;overflow-x:auto;white-space:pre-wrap"></pre>
-    </details>
-    </div>
-    <div id="cfg-err" style="display:none;background:var(--red-light);color:var(--red);padding:9px 12px;border-radius:7px;font-size:12px;margin-top:10px"></div>
-    <div class="mfoot"><button class="btn btn-g" onclick="saveConfig()" style="width:100%;justify-content:center;padding:10px">Gem og forbind</button></div>
-    <!-- BRUGERADMINISTRATION (kun admin) -->
-    <div id="user-admin-section" style="display:none;margin-top:20px;padding-top:16px;border-top:1px solid var(--gray-200)">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-        <span style="font-size:13px;font-weight:600">Brugere</span>
-        <button class="btn btn-g btn-sm" onclick="openNewUser()">+ Ny bruger</button>
-      </div>
-      <div id="user-list"></div>
-    </div>
-    <div id="change-pw-section" style="display:none;margin-top:20px;padding-top:16px;border-top:1px solid var(--gray-200)">
-      <div style="font-size:13px;font-weight:600;margin-bottom:10px">Skift password</div>
-      <label class="lbl">Nuværende password</label>
-      <input class="inp" id="pw-current" type="password" placeholder="••••••••">
-      <label class="lbl">Nyt password</label>
-      <input class="inp" id="pw-new" type="password" placeholder="••••••••">
-      <label class="lbl">Gentag nyt password</label>
-      <input class="inp" id="pw-repeat" type="password" placeholder="••••••••">
-      <div id="pw-err" style="display:none;background:var(--red-light);color:var(--red);padding:8px 12px;border-radius:7px;font-size:12px;margin-top:8px"></div>
-      <button class="btn btn-g btn-sm" style="margin-top:10px" onclick="changePassword()">Skift password</button>
-    </div>
-  </div>
-</div>
-
 <!-- NY BRUGER MODAL -->
 <div class="modal-bg" id="newuser-modal">
   <div class="modal">
@@ -530,6 +539,20 @@ textarea.inp{height:52px;resize:vertical}
     <div class="mfoot">
       <button class="btn" onclick="closeModal('pl-edit-modal')">Annuller</button>
       <button class="btn btn-g" onclick="savePlEdit()">Gem</button>
+    </div>
+  </div>
+</div>
+
+<!-- RESET PASSWORD MODAL -->
+<div class="modal-bg" id="resetpw-modal">
+  <div class="modal">
+    <button class="mx" onclick="closeModal('resetpw-modal')">✕</button>
+    <h2 id="rp-title">Reset password</h2>
+    <label class="lbl">Nyt password</label>
+    <input class="inp" id="rp-pw" type="password" placeholder="Mindst 6 tegn">
+    <div class="mfoot">
+      <button class="btn" onclick="closeModal('resetpw-modal')">Annuller</button>
+      <button class="btn btn-g" onclick="saveResetPassword()">Gem</button>
     </div>
   </div>
 </div>
@@ -750,21 +773,83 @@ function doLogout(){
 function showLoginErr(m){const el=document.getElementById('login-err');el.textContent=m;el.style.display='block'}
 
 // ─── BRUGERE ─────────────────────────────────────────────────────
-function renderUserList(){
+
+function navToUsers(){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-users').classList.add('active');
+  document.getElementById('nav-users-btn').classList.add('active');
+  document.getElementById('page-title').textContent='Brugere';
+  renderUsersPage();
+}
+
+function renderSettings(){
   const isAdmin=CURRENT_USER&&CURRENT_USER.rolle==='admin';
-  document.getElementById('user-admin-section').style.display=isAdmin?'block':'none';
-  if(!isAdmin)return;
+  document.getElementById('settings-admin-card').style.display=isAdmin?'block':'none';
+  document.getElementById('settings-sql-card').style.display=isAdmin?'block':'none';
+  document.getElementById('settings-nonadmin-card').style.display=isAdmin?'none':'block';
+  if(isAdmin){
+    document.getElementById('s-url').value=SB_URL;
+    document.getElementById('s-key').value=SB_KEY;
+    document.getElementById('s-date').value=OV_DATE;
+    document.getElementById('s-sql').textContent=SETUP_SQL;
+  }
+}
+
+async function saveSettings(){
+  const url=document.getElementById('s-url').value.trim().replace(/\/$/,'');
+  const key=document.getElementById('s-key').value.trim();
+  if(!url||!key){toast('Udfyld URL og nøgle',true);return}
+  SB_URL=url;SB_KEY=key;
+  OV_DATE=document.getElementById('s-date').value||'2026-10-01';
+  localStorage.setItem('fobu_sb_url',SB_URL);
+  localStorage.setItem('fobu_sb_key',SB_KEY);
+  localStorage.setItem('fobu_ov_date',OV_DATE);
+  toast('Indstillinger gemt');await syncNow();
+}
+
+function renderUsersPage(){
+  if(!CURRENT_USER)return;
+  const initials=CURRENT_USER.navn.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  document.getElementById('pu-avatar').textContent=initials;
+  document.getElementById('pu-name').textContent=CURRENT_USER.navn;
+  document.getElementById('pu-email').textContent=CURRENT_USER.email;
+  document.getElementById('pu-role').innerHTML='<span class="role-tag '+(CURRENT_USER.rolle==='admin'?'role-admin':'role-user')+'">'+CURRENT_USER.rolle+'</span>';
+  document.getElementById('pu-bulk-delete').checked=BULK_DELETE;
+  document.getElementById('users-admin-card').style.display=CURRENT_USER.rolle==='admin'?'block':'none';
+  const pwErr=document.getElementById('pw-err');if(pwErr)pwErr.style.display='none';
+  ['pw-current','pw-new','pw-repeat'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});
+  if(CURRENT_USER.rolle==='admin')renderUserList();
+}
+
+function renderUserList(){
+  if(!CURRENT_USER||CURRENT_USER.rolle!=='admin')return;
   const html=state.brugere.map(u=>`<div class="user-row">
     <div class="user-avatar">${u.navn.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase()}</div>
-    <div class="user-info">
-      <div class="user-name">${esc(u.navn)}</div>
-      <div class="user-email">${esc(u.email)}</div>
-    </div>
+    <div class="user-info"><div class="user-name">${esc(u.navn)}</div><div class="user-email">${esc(u.email)}</div></div>
     <span class="role-tag ${u.rolle==='admin'?'role-admin':'role-user'}">${u.rolle}</span>
     ${!u.aktiv?'<span class="inactive-tag">Inaktiv</span>':''}
+    <button class="btn btn-sm" onclick="openResetPassword('${u.id}','${esc(u.navn)}')">Reset pw</button>
     ${u.id!==CURRENT_USER.id?`<button class="btn btn-sm btn-r" onclick="toggleUserAktiv('${u.id}',${u.aktiv})">${u.aktiv?'Deaktiver':'Aktiver'}</button>`:'<span style="font-size:11px;color:var(--gray-400)">(dig)</span>'}
   </div>`).join('');
-  document.getElementById('user-list').innerHTML=html||'<div style="font-size:12px;color:var(--gray-400)">Ingen brugere endnu</div>';
+  const el=document.getElementById('user-list');
+  if(el)el.innerHTML=html||'<div style="font-size:12px;color:var(--gray-400)">Ingen brugere endnu</div>';
+}
+
+let resetPwUserId=null;
+function openResetPassword(id,navn){
+  resetPwUserId=id;
+  document.getElementById('rp-title').textContent='Reset password – '+navn;
+  document.getElementById('rp-pw').value='';
+  document.getElementById('resetpw-modal').classList.add('open');
+}
+async function saveResetPassword(){
+  const pw=document.getElementById('rp-pw').value;
+  if(!pw||pw.length<6){toast('Mindst 6 tegn',true);return}
+  const hash=await sha256(pw);
+  closeModal('resetpw-modal');
+  try{await sbPatch('brugere',resetPwUserId,{password_hash:hash});toast('Password nulstillet')}
+  catch(e){toast('Fejl: '+e.message,true)}
 }
 
 let editUserId=null;
@@ -822,42 +907,6 @@ function refreshOwnerDropdown(){
   });
 }
 
-function prefillConfig(fromLogin){
-  var isAdmin=fromLogin||!CURRENT_USER||CURRENT_USER.rolle==="admin";
-  var af=document.getElementById("cfg-admin-fields");
-  var sf=document.getElementById("cfg-sql-section");
-  if(af)af.style.display=isAdmin?"block":"none";
-  if(sf)sf.style.display=isAdmin?"block":"none";
-  var pwSection=document.getElementById("change-pw-section");
-  if(pwSection)pwSection.style.display=CURRENT_USER?"block":"none";
-  var pwErr=document.getElementById("pw-err");
-  if(pwErr)pwErr.style.display="none";
-  ["pw-current","pw-new","pw-repeat"].forEach(function(id){var el=document.getElementById(id);if(el)el.value="";});
-  var urlEl=document.getElementById("cfg-url"),keyEl=document.getElementById("cfg-key");
-  if(isAdmin&&urlEl)urlEl.value=SB_URL;
-  if(isAdmin&&keyEl)keyEl.value=SB_KEY;
-  var dateEl=document.getElementById("cfg-date"),bdEl=document.getElementById("cfg-bulk-delete");
-  if(dateEl)dateEl.value=OV_DATE;
-  if(bdEl)bdEl.checked=BULK_DELETE;
-}
-function openConfig(){prefillConfig();renderUserList();document.getElementById('config-modal').classList.add('open')}
-async function saveConfig(){
-  const isAdmin=!CURRENT_USER||CURRENT_USER.rolle==='admin';
-  if(isAdmin){
-    const url=document.getElementById('cfg-url').value.trim().replace(/\/$/,'');
-    const key=document.getElementById('cfg-key').value.trim();
-    if(!url||!key){showCfgErr('Udfyld URL og nøgle');return}
-    SB_URL=url;SB_KEY=key;
-    localStorage.setItem('fobu_sb_url',SB_URL);localStorage.setItem('fobu_sb_key',SB_KEY);
-  }
-  OV_DATE=document.getElementById('cfg-date').value||'2026-10-01';
-  BULK_DELETE=document.getElementById('cfg-bulk-delete').checked;
-  localStorage.setItem('fobu_ov_date',OV_DATE);
-  if(!CURRENT_USER){closeModal('config-modal');toast('Forbindelsen er gemt – log ind nu');return}
-  closeModal('config-modal');await syncNow();
-}
-function showCfgErr(m){const el=document.getElementById('cfg-err');el.textContent=m;el.style.display='block'}
-function copySQL(){navigator.clipboard.writeText(SETUP_SQL).then(()=>toast('SQL kopieret')).catch(()=>toast('Kopiér manuelt fra boksen',true))}
 
 // ─── SUPABASE ────────────────────────────────────────────────────
 function sbH(){return{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=minimal'}}
@@ -932,8 +981,10 @@ function nav(page,btn){
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('page-'+page).classList.add('active');
   btn.classList.add('active');
-  const titles={dashboard:'Overblik',tasks:'Opgaver',kanban:'Kanban',deadlines:'Deadlines',institutions:'Institutioner',activity:'Aktivitetslog',planning:'Planlægning'};
+  const titles={dashboard:'Overblik',tasks:'Opgaver',kanban:'Kanban',deadlines:'Deadlines',institutions:'Institutioner',activity:'Aktivitetslog',planning:'Planlægning',settings:'Indstillinger',users:'Brugere'};
   document.getElementById('page-title').textContent=titles[page]||page;
+  if(page==='settings')renderSettings();
+  if(page==='users')renderUsersPage();
 }
 
 // ─── COUNTDOWN ───────────────────────────────────────────────────
