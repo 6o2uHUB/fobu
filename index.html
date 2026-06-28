@@ -210,6 +210,9 @@ textarea.inp{height:52px;resize:vertical}
     <input class="inp" id="login-pw" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
     <button class="btn btn-g" style="width:100%;justify-content:center;margin-top:16px;padding:10px" onclick="doLogin()">Log ind</button>
     <div class="login-err" id="login-err"></div>
+    <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--gray-100);text-align:center">
+      <button onclick="openConfig()" style="background:none;border:none;font-size:12px;color:var(--gray-400);cursor:pointer;font-family:inherit">⚙ Indstil Supabase-forbindelse</button>
+    </div>
   </div>
 </div>
 
