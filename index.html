@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="da">
 <head>
 <meta charset="UTF-8">
@@ -239,12 +239,12 @@ textarea.inp{height:52px;resize:vertical}
   <div class="main">
     <div class="topbar">
       <h1 id="page-title">Overblik</h1>
-      <div id="topbar-user" style="display:flex;align-items:center;gap:8px;margin-left:auto;cursor:pointer" onclick="navToUsers()">
-        <div id="topbar-avatar" style="width:28px;height:28px;border-radius:50%;background:var(--green-light);border:1.5px solid var(--green-badge);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--green)"></div>
+      <button class="tbtn g" onclick="openAddTask()" style="margin-left:auto">+ Ny opgave</button>
+      <div id="topbar-user" style="display:flex;align-items:center;gap:8px;cursor:pointer" onclick="navToUsers()">
+        <div id="topbar-avatar" style="width:32px;height:32px;border-radius:50%;background:var(--green-light);border:1.5px solid var(--green-badge);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--green)"></div>
         <span id="topbar-name" style="font-size:12px;font-weight:500;color:var(--gray-600)"></span>
       </div>
       <button class="tbtn" onclick="doLogout()" title="Log ud" style="font-size:11px">Log ud</button>
-      <button class="tbtn g" onclick="openAddTask()">+ Ny opgave</button>
     </div>
     <div class="content">
 
@@ -725,8 +725,6 @@ window.addEventListener('DOMContentLoaded',()=>{
 function bootApp(){
   document.getElementById('login-screen').classList.remove('show');
   document.getElementById('app').style.display='flex';
-  prefillConfig();
-  closeModal('config-modal');
   updateTopbarUser();
   syncNow();
 }
