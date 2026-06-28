@@ -670,6 +670,9 @@ function instsForScope(sc,instId){
 // ─── STATE ───────────────────────────────────────────────────────
 let SB_URL=localStorage.getItem('fobu_sb_url')||'https://zrccwvolenvsjaundbfy.supabase.co';
 let SB_KEY=localStorage.getItem('fobu_sb_key')||'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpyY2N3dm9sZW52c2phdW5kYmZ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI1ODYwOTcsImV4cCI6MjA5ODE2MjA5N30.grUJwMAbh9JXjqNpFLH3uv9PjniXopH-ap9t--J4g44';
+// gem altid hardcodede værdier så config-modal ikke behøves
+localStorage.setItem('fobu_sb_url',SB_URL);
+localStorage.setItem('fobu_sb_key',SB_KEY);
 let OV_DATE=localStorage.getItem('fobu_ov_date')||'2026-10-01';
 let BRUGER=localStorage.getItem('fobu_bruger')||'';
 let BULK_DELETE=false; // nulstilles altid – slås til manuelt per session
@@ -716,7 +719,7 @@ async function doLogin(){
   const email=document.getElementById('login-email').value.trim().toLowerCase();
   const pw=document.getElementById('login-pw').value;
   if(!email||!pw){showLoginErr('Udfyld email og password');return}
-  if(!SB_URL||!SB_KEY){showLoginErr('Opsæt Supabase-forbindelsen først – klik på "Forbind" nedenfor');return}
+  if(!SB_URL||!SB_KEY){showLoginErr('Teknisk fejl – kontakt Simon');return}
   try{
     const hash=await sha256(pw);
     const rows=await sbGet('brugere','email=eq.'+encodeURIComponent(email)+'&password_hash=eq.'+hash+'&aktiv=eq.true');
