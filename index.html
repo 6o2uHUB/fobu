@@ -315,17 +315,18 @@ textarea.inp{height:52px;resize:vertical}
       <!-- INSTITUTIONER -->
       <div class="page" id="page-institutions">
         <div class="toolbar">
-          <input type="text" id="iq" placeholder="Søg institution..." oninput="renderInstitutions()">
+          <input type="text" id="iq" placeholder="Søg institution eller nr..." oninput="renderInstitutions()">
           <select id="ift" onchange="renderInstitutions()"><option value="">Alle typer</option></select>
         </div>
         <div class="card" style="padding:0">
           <div class="tbl-wrap">
             <table>
               <thead><tr>
-                <th style="padding-left:13px;width:28%">Institution</th>
-                <th style="width:12%">Type</th>
-                <th style="width:12%">Kommune</th>
-                <th style="width:14%">Fremskridt</th>
+                <th style="padding-left:13px;width:6%">Nr.</th>
+                <th style="width:25%">Institution</th>
+                <th style="width:11%">Type</th>
+                <th style="width:11%">Kommune</th>
+                <th style="width:13%">Fremskridt</th>
                 <th style="width:7%">✓</th><th style="width:7%">→</th><th style="width:7%">✗</th>
                 <th></th>
               </tr></thead>
@@ -633,59 +634,59 @@ on conflict (id) do nothing;`;
 
 // ─── INSTITUTIONER ───────────────────────────────────────────────
 const INSTS=[
-  {id:'i01',name:'Asserballe Private Børnehus',type:'Privat',kommune:'Sønderborg'},
-  {id:'i02',name:'Bjørnegården',type:'Selvejende',kommune:'Gribskov'},
-  {id:'i03',name:'Bommerhaven',type:'Privat',kommune:'Vejle'},
-  {id:'i04',name:'Bryggens Børne- og Ungdomscenter',type:'Selvejende',kommune:'København (S)'},
-  {id:'i05',name:'Byggelegepladsen Regnbuen',type:'Selvejende',kommune:'Hvidovre'},
-  {id:'i06',name:'Børnebo, Lyne',type:'Privat',kommune:'RKSK/Varde'},
-  {id:'i07',name:'Børnehaven Voldparken',type:'Selvejende',kommune:'København (Brønshøj)'},
-  {id:'i08',name:'Børnehaven Østergade',type:'Privat',kommune:'Morsø'},
-  {id:'i09',name:'Børnegården Rundhøj',type:'Selvejende',kommune:'Aarhus (Højbjerg)'},
-  {id:'i10',name:'Børnehaven Evigglad S/I',type:'Privat',kommune:'Frederiksberg'},
-  {id:'i11',name:'Børnehaven Forglemmigej',type:'Privat',kommune:'Nørresundby'},
-  {id:'i12',name:'Børnehaven Sct. Georgsgården',type:'Privat',kommune:'Lemvig'},
-  {id:'i13',name:'Børnehuset Lindely',type:'Privat',kommune:'Herning'},
-  {id:'i14',name:'Børnehuset Pippi',type:'Privat',kommune:'Aalborg'},
-  {id:'i15',name:'Børnehuset Siv',type:'Privat',kommune:'Furesø'},
-  {id:'i16',name:'Børnehuset Skovgården',type:'Privat',kommune:'Holstebro'},
-  {id:'i17',name:'Cathrine Asylets Folkebørnehave',type:'Privat',kommune:'Haderslev'},
-  {id:'i18',name:'Daginstitutionen Gaardhaven ApS',type:'Privat',kommune:'Vejle'},
-  {id:'i19',name:'Dr. Louises Børnehave',type:'Privat',kommune:'Silkeborg'},
-  {id:'i20',name:'Daginstitutionen Dagmargården',type:'Privat',kommune:'Fredericia'},
-  {id:'i21',name:'Daginstitutionen Troldehulen ApS',type:'Privat',kommune:'Aalborg'},
-  {id:'i22',name:'Dansk Tysk Børnehus ApS',type:'Privat',kommune:'Frederiksberg'},
-  {id:'i23',name:'Den Musikalske Børnehave',type:'Privat',kommune:'Aalborg'},
-  {id:'i24',name:'Den Integrerede Institution Bryggehuset',type:'Selvejende',kommune:'København (S)'},
-  {id:'i25',name:'Den Private Institution Snurretoppen',type:'Privat',kommune:'Nørresundby'},
-  {id:'i26',name:'Døstrup Børnehus NaturligVis',type:'Privat',kommune:'Mariagerfjord'},
-  {id:'i27',name:'Eventyrskoven Steinerinstitution',type:'Privat',kommune:'Vordingborg'},
-  {id:'i28',name:'Fritidsklubben Furesøgård',type:'Privat',kommune:'Furesø'},
-  {id:'i29',name:'Holsted Børnehave',type:'Privat',kommune:'Vejen'},
-  {id:'i30',name:'Herning Valgmenigheds Skovbørnehave',type:'Privat',kommune:'Herning'},
-  {id:'i31',name:'Huset i Skoven',type:'Privat',kommune:'Ukendt'},
-  {id:'i32',name:"KVL's Børnehus",type:'Privat',kommune:'Frederiksberg'},
-  {id:'i33',name:'Kammas Børnehus',type:'Privat',kommune:'Ukendt'},
-  {id:'i34',name:'Kirsebærhaven, S/I',type:'Privat',kommune:'Mariagerfjord'},
-  {id:'i35',name:'Køgevejens Børne- og Ungdomshus',type:'Selvejende',kommune:'Hvidovre'},
-  {id:'i36',name:'Legehuset Hulahop S/I',type:'Privat',kommune:'Syddjurs'},
-  {id:'i37',name:'Montessori International Preschool Frederiksberg ApS',type:'Privat',kommune:'Frederiksberg'},
-  {id:'i38',name:'Montessori International Preschool Valby',type:'Privat',kommune:'København'},
-  {id:'i39',name:'Mikael & Bette Mikael Børnehave og Vuggestue',type:'Privat',kommune:'Hjørring'},
-  {id:'i40',name:'Nørrebros Børnehave',type:'Privat',kommune:'Nykøbing F'},
-  {id:'i41',name:'Privatbørnehaven Lille Vestervang',type:'Privat',kommune:'Holbæk'},
-  {id:'i42',name:'Privatinstitutionen Børnehuset Bjørnehulen',type:'Privat',kommune:'Aalborg'},
-  {id:'i43',name:'Rudolf Steiner Børnehave – Malene',type:'Privat',kommune:'Fredensborg'},
-  {id:'i44',name:'S/I Idrætsfritidsinstitutionen Skjold - FC',type:'Selvejende',kommune:'København'},
-  {id:'i45',name:'Skovbo Skovbørnehave',type:'Privat',kommune:'Gentofte'},
-  {id:'i46',name:'Tinytots International Preschool ApS',type:'Privat',kommune:'København'},
-  {id:'i47',name:'Tvingstrup Landsbybørnehave',type:'Privat',kommune:'Horsens'},
-  {id:'i48',name:'Verdens Børn ApS',type:'Privat',kommune:'København'},
-  {id:'i49',name:'Verdens Børn Farum ApS',type:'Privat',kommune:'Furesø'},
-  {id:'i50',name:'Verdens Børn Glostrup ApS',type:'Privat',kommune:'Glostrup'},
-  {id:'i51',name:'Vuggehaven i Nørregade S/I',type:'Selvejende',kommune:'København (K)'},
-  {id:'i52',name:'Vuggestuen Evigglad privat S/I',type:'Privat',kommune:'Frederiksberg'},
-  {id:'i53',name:'Waldorf Børnehaven Lille Bjørn S/I',type:'Selvejende',kommune:'Furesø'},
+  {id:'i19',nr:13,name:'Dr. Louises Børnehave',type:'Privat',kommune:'Silkeborg'},
+  {id:'i51',nr:14,name:'Vuggehaven i Nørregade S/I',type:'Selvejende',kommune:'København (K)'},
+  {id:'i44',nr:18,name:'S/I Idrætsfritidsinstitutionen Skjold - FC',type:'Selvejende',kommune:'København'},
+  {id:'i03',nr:21,name:'Bommerhaven',type:'Privat',kommune:'Vejle'},
+  {id:'i24',nr:27,name:'Den Integrerede Institution Bryggehuset',type:'Selvejende',kommune:'København (S)'},
+  {id:'i07',nr:32,name:'Børnehaven Voldparken',type:'Selvejende',kommune:'København (Brønshøj)'},
+  {id:'i13',nr:39,name:'Børnehuset Lindely',type:'Privat',kommune:'Herning'},
+  {id:'i21',nr:40,name:'Daginstitutionen Troldehulen ApS',type:'Privat',kommune:'Aalborg'},
+  {id:'i45',nr:77,name:'Skovbo Skovbørnehave',type:'Privat',kommune:'Gentofte'},
+  {id:'i36',nr:117,name:'Legehuset Hulahop S/I',type:'Privat',kommune:'Syddjurs'},
+  {id:'i39',nr:132,name:'Mikael & Bette Mikael Børnehave og Vuggestue',type:'Privat',kommune:'Hjørring'},
+  {id:'i01',nr:136,name:'Asserballe Private Børnehus',type:'Privat',kommune:'Sønderborg'},
+  {id:'i53',nr:137,name:'Waldorf Børnehaven Lille Bjørn S/I',type:'Selvejende',kommune:'Furesø'},
+  {id:'i05',nr:169,name:'Byggelegepladsen Regnbuen',type:'Selvejende',kommune:'Hvidovre'},
+  {id:'i15',nr:200,name:'Børnehuset Siv',type:'Privat',kommune:'Furesø'},
+  {id:'i18',nr:202,name:'Daginstitutionen Gaardhaven ApS',type:'Privat',kommune:'Vejle'},
+  {id:'i52',nr:210,name:'Vuggestuen Evigglad privat S/I',type:'Privat',kommune:'Frederiksberg'},
+  {id:'i17',nr:221,name:'Cathrine Asylets Folkebørnehave',type:'Privat',kommune:'Haderslev'},
+  {id:'i34',nr:254,name:'Kirsebærhaven, S/I',type:'Privat',kommune:'Mariagerfjord'},
+  {id:'i26',nr:255,name:'Døstrup Børnehus NaturligVis',type:'Privat',kommune:'Mariagerfjord'},
+  {id:'i38',nr:255,name:'Montessori International Preschool Valby',type:'Privat',kommune:'København'},
+  {id:'i32',nr:256,name:"KVL's Børnehus",type:'Privat',kommune:'Frederiksberg'},
+  {id:'i37',nr:257,name:'Montessori International Preschool Frederiksberg ApS',type:'Privat',kommune:'Frederiksberg'},
+  {id:'i16',nr:258,name:'Børnehuset Skovgården',type:'Privat',kommune:'Holstebro'},
+  {id:'i41',nr:259,name:'Privatbørnehaven Lille Vestervang',type:'Privat',kommune:'Holbæk'},
+  {id:'i22',nr:264,name:'Dansk Tysk Børnehus ApS',type:'Privat',kommune:'Frederiksberg'},
+  {id:'i46',nr:265,name:'Tinytots International Preschool ApS',type:'Privat',kommune:'København'},
+  {id:'i47',nr:269,name:'Tvingstrup Landsbybørnehave',type:'Privat',kommune:'Horsens'},
+  {id:'i29',nr:279,name:'Holsted Børnehave',type:'Privat',kommune:'Vejen'},
+  {id:'i28',nr:450,name:'Fritidsklubben Furesøgård',type:'Privat',kommune:'Furesø'},
+  {id:'i40',nr:456,name:'Nørrebros Børnehave',type:'Privat',kommune:'Nykøbing F'},
+  {id:'i27',nr:458,name:'Eventyrskoven Steinerinstitution',type:'Privat',kommune:'Vordingborg'},
+  {id:'i09',nr:531,name:'Børnegården Rundhøj',type:'Selvejende',kommune:'Aarhus (Højbjerg)'},
+  {id:'i20',nr:560,name:'Daginstitutionen Dagmargården',type:'Privat',kommune:'Fredericia'},
+  {id:'i10',nr:570,name:'Børnehaven Evigglad S/I',type:'Privat',kommune:'Frederiksberg'},
+  {id:'i04',nr:601,name:'Bryggens Børne- og Ungdomscenter',type:'Selvejende',kommune:'København (S)'},
+  {id:'i12',nr:638,name:'Børnehaven Sct. Georgsgården',type:'Privat',kommune:'Lemvig'},
+  {id:'i06',nr:644,name:'Børnebo, Lyne',type:'Privat',kommune:'RKSK/Varde'},
+  {id:'i35',nr:702,name:'Køgevejens Børne- og Ungdomshus',type:'Selvejende',kommune:'Hvidovre'},
+  {id:'i43',nr:706,name:'Rudolf Steiner Børnehave – Malene',type:'Privat',kommune:'Fredensborg'},
+  {id:'i23',nr:719,name:'Den Musikalske Børnehave',type:'Privat',kommune:'Aalborg'},
+  {id:'i25',nr:722,name:'Den Private Institution Snurretoppen',type:'Privat',kommune:'Nørresundby'},
+  {id:'i42',nr:723,name:'Privatinstitutionen Børnehuset Bjørnehulen',type:'Privat',kommune:'Aalborg'},
+  {id:'i30',nr:727,name:'Herning Valgmenigheds Skovbørnehave',type:'Privat',kommune:'Herning'},
+  {id:'i08',nr:729,name:'Børnehaven Østergade',type:'Privat',kommune:'Morsø'},
+  {id:'i33',nr:748,name:'Kammas Børnehus',type:'Privat',kommune:'Ukendt'},
+  {id:'i31',nr:769,name:'Huset i Skoven',type:'Privat',kommune:'Ukendt'},
+  {id:'i48',nr:771,name:'Verdens Børn ApS',type:'Privat',kommune:'København'},
+  {id:'i49',nr:772,name:'Verdens Børn Farum ApS',type:'Privat',kommune:'Furesø'},
+  {id:'i50',nr:773,name:'Verdens Børn Glostrup ApS',type:'Privat',kommune:'Glostrup'},
+  {id:'i14',nr:774,name:'Børnehuset Pippi',type:'Privat',kommune:'Aalborg'},
+  {id:'i02',nr:866,name:'Bjørnegården',type:'Selvejende',kommune:'Gribskov'},
+  {id:'i11',nr:983,name:'Børnehaven Forglemmigej',type:'Privat',kommune:'Nørresundby'},
 ];
 
 function instsForScope(sc,instId){
@@ -1043,13 +1044,13 @@ function renderDashboard(){
       </div>`}).join(''):
     '<div style="font-size:12px;color:var(--gray-400);padding:8px 0">Ingen overskredet deadlines 🎉</div>';
 
-  const nearT=t.filter(x=>x.deadline&&x.deadline>=today&&x.deadline<=tomStr&&x.status!=='green');
+  const nearT=t.filter(x=>x.deadline&&x.deadline>=today&&x.deadline<=tomStr&&x.status!=='green').sort((a,b)=>{const ia=instById(a.instId),ib=instById(b.instId);return(ia?ia.nr:9999)-(ib?ib.nr:9999)});
   document.getElementById('ct-near').textContent=nearT.length||'';
   document.getElementById('dash-near').innerHTML=nearT.length?
     nearT.slice(0,6).map(x=>{const sk=findSkabelon(x.skabelonId);const inst=instById(x.instId);return`<div class="activity-item cr" onclick="openEditSingle('${x.id}')">
       <div class="a-dot a"></div>
       <div class="a-body"><div><span class="a-who">${esc(sk?sk.item.name:'–')}</span><span class="a-time">${esc(x.deadline)}</span></div>
-      <div class="a-text">${esc(inst?inst.name:'–')}</div></div>
+      <div class="a-text">${inst?'#'+inst.nr+' ':''}${esc(inst?inst.name:'–')}</div></div>
     </div>`}).join(''):
     '<div style="font-size:12px;color:var(--gray-400);padding:8px 0">Ingen deadlines i dag eller i morgen</div>';
 
@@ -1082,7 +1083,7 @@ function getFilteredTasks(){
     if(q){
       const inst=instById(t.instId);
       const nm=(sk?sk.item.name+' '+sk.sub.name+' '+sk.cat.name:'').toLowerCase();
-      if(!nm.includes(q)&&!(inst?inst.name:'').toLowerCase().includes(q)&&!(t.owner||'').toLowerCase().includes(q))return false;
+      if(!nm.includes(q)&&!(inst?inst.name:'').toLowerCase().includes(q)&&!(inst?String(inst.nr):'').includes(q)&&!(t.owner||'').toLowerCase().includes(q))return false;
     }
     return true;
   });
@@ -1128,12 +1129,12 @@ function renderTasks(){
         </td></tr>`;
 
         if(!o3)return;
-        itemTasks.forEach(t=>{
+        itemTasks.slice().sort((a,b)=>{const ia=instById(a.instId),ib=instById(b.instId);return(ia?ia.nr:9999)-(ib?ib.nr:9999)}).forEach(t=>{
           const inst=instById(t.instId);
           const over=t.deadline&&t.deadline<today&&t.status!=='green';
           const nk=state.kommentarer.filter(k=>k.opgaveId===t.id).length;
           html+=`<tr class="tl-inst cr" onclick="openEditSingle('${t.id}')">
-            <td style="padding-left:58px">${esc(inst?inst.name:'–')}<span class="sp" style="margin-left:5px">${esc(inst?inst.type:'')}</span></td>
+            <td style="padding-left:58px"><span style="color:var(--gray-400);font-size:10px;margin-right:5px">${inst?inst.nr:'–'}</span>${esc(inst?inst.name:'–')}<span class="sp" style="margin-left:5px">${esc(inst?inst.type:'')}</span></td>
             <td style="font-size:11px;color:var(--gray-600)">${esc(t.owner||'–')}</td>
             <td>${sbadge(t.status)}</td>
             <td style="font-size:10px;${over?'color:var(--red);font-weight:600':'color:var(--gray-400)'}">${t.deadline||'–'}</td>
@@ -1315,13 +1316,15 @@ function renderInstitutions(){
   const q=(document.getElementById('iq')||{value:''}).value.toLowerCase();
   const tp=(document.getElementById('ift')||{value:''}).value;
   let html='';
-  INSTS.filter(i=>(!q||i.name.toLowerCase().includes(q)||i.type.toLowerCase().includes(q)||i.kommune.toLowerCase().includes(q))&&(!tp||i.type===tp))
+  INSTS.filter(i=>(!q||i.name.toLowerCase().includes(q)||i.type.toLowerCase().includes(q)||i.kommune.toLowerCase().includes(q)||String(i.nr).includes(q))&&(!tp||i.type===tp))
+    .sort((a,b)=>a.nr-b.nr)
     .forEach(inst=>{
       const it=state.tasks.filter(t=>t.instId===inst.id);
       const gr=it.filter(t=>t.status==='green').length,ye=it.filter(t=>t.status==='yellow').length,re=it.filter(t=>t.status==='red').length;
       const pct=it.length?Math.round(gr/it.length*100):0;
       html+=`<tr class="cr" onclick="filterToInst('${inst.id}','${esc(inst.name)}')">
-        <td style="padding-left:13px;font-weight:500">${esc(inst.name)}</td>
+        <td style="padding-left:13px;color:var(--gray-400);font-size:11px">${inst.nr}</td>
+        <td style="font-weight:500">${esc(inst.name)}</td>
         <td><span class="sp">${esc(inst.type)}</span></td>
         <td style="font-size:10px;color:var(--gray-400)">${esc(inst.kommune)}</td>
         <td><div style="display:flex;align-items:center;gap:6px"><div class="prog-bg"><div class="prog-fill" style="width:${pct}%"></div></div><span style="font-size:10px;color:var(--gray-400)">${pct}%</span></div></td>
@@ -1329,7 +1332,7 @@ function renderInstitutions(){
         <td style="font-size:10px;color:var(--gray-400)">${it.length} opgaver →</td>
       </tr>`;
     });
-  if(!html)html='<tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--gray-400)">Ingen resultater</td></tr>';
+  if(!html)html='<tr><td colspan="9" style="text-align:center;padding:2rem;color:var(--gray-400)">Ingen resultater</td></tr>';
   document.getElementById('inst-tbody').innerHTML=html;
   const ft=document.getElementById('ift');
   if(ft&&!ft.querySelector('option[value="Privat"]')){
@@ -1486,7 +1489,7 @@ async function deletePl(niveau,l1id,l2id,l3id){
 // ─── NY OPGAVE ───────────────────────────────────────────────────
 function populateInstSelect(){
   const el=document.getElementById('tm-inst');
-  el.innerHTML='<option value="">Vælg institution...</option>'+INSTS.map(i=>`<option value="${i.id}">${esc(i.name)}</option>`).join('');
+  el.innerHTML='<option value="">Vælg institution...</option>'+[...INSTS].sort((a,b)=>a.nr-b.nr).map(i=>`<option value="${i.id}">${i.nr} – ${esc(i.name)}</option>`).join('');
 }
 function refreshL1Modal(val){
   const el=document.getElementById('tm-l1');
@@ -1563,7 +1566,7 @@ function openEditSingle(id){
   const inst=instById(t.instId);
   const sk=findSkabelon(t.skabelonId);
   document.getElementById('em-title').textContent=sk?sk.item.name:'Opgave';
-  document.getElementById('em-inst').textContent=(inst?inst.name:'')+(sk?' · '+sk.cat.name+' › '+sk.sub.name:'');
+  document.getElementById('em-inst').textContent=(inst?'#'+inst.nr+' '+inst.name:'')+(sk?' · '+sk.cat.name+' › '+sk.sub.name:'');
   refreshOwnerDropdown();
   document.getElementById('em-owner').value=t.owner||'';
   document.getElementById('em-status').value=t.status;
