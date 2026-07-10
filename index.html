@@ -254,7 +254,7 @@ textarea.inp{height:54px;resize:vertical}
   <div class="main">
     <div class="topbar">
       <h1 id="page-title">Overblik</h1>
-      <button class="tbtn g" id="add-btn" onclick="openAddTask()" style="margin-left:auto">+ Ny opgave</button>
+      <button class="tbtn g" id="add-btn" onclick="openAddTask()" style="margin-left:auto;display:none">+ Ny opgave</button>
       <div id="topbar-user" style="display:flex;align-items:center;gap:8px;cursor:pointer" onclick="navToUsers()">
         <div id="topbar-avatar" style="width:32px;height:32px;border-radius:50%;background:var(--green-light);border:1.5px solid var(--green-badge);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--green)"></div>
         <span id="topbar-name" style="font-size:12px;font-weight:500;color:var(--gray-600)"></span>
@@ -1369,11 +1369,10 @@ function nav(page,btn){
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('page-'+page).classList.add('active');
   btn.classList.add('active');
-  const titles={dashboard:'Overblik',tasks:'Opgaver',kanban:'Kanban',deadlines:'Deadlines',institutions:'Institutioner',mtasks:'Medarbejder-opgaver',mkanban:'Medarbejder-kanban',mdeadlines:'Medarbejder-deadlines',medarbejdere:'Medarbejdere',activity:'Aktivitetslog',planning:'Planlægning',settings:'Indstillinger',users:'Brugere'};
+  const titles={dashboard:'Overblik',tasks:'Opgaver',kanban:'Kanban',deadlines:'Deadlines',institutions:'Institutioner',mtasks:'Opgaver',mkanban:'Kanban',mdeadlines:'Deadlines',medarbejdere:'Medarbejdere',activity:'Aktivitetslog',planning:'Planlægning',settings:'Indstillinger',users:'Brugere'};
   document.getElementById('page-title').textContent=titles[page]||page;
   const addBtn=document.getElementById('add-btn');
   const addCfg={
-    dashboard:{label:'+ Ny opgave',fn:openAddTask},
     tasks:{label:'+ Ny opgave',fn:openAddTask},
     kanban:{label:'+ Ny opgave',fn:openAddTask},
     deadlines:{label:'+ Ny opgave',fn:openAddTask},
@@ -1423,43 +1422,57 @@ function renderCountdown(){
 
 // ─── DASHBOARD ───────────────────────────────────────────────────
 function renderDashboard(){
-  const t=state.tasks;
   const today=new Date().toISOString().slice(0,10);
   const tom=new Date();tom.setDate(tom.getDate()+1);const tomStr=tom.toISOString().slice(0,10);
-  const gr=t.filter(x=>x.status==='green').length,ye=t.filter(x=>x.status==='yellow').length,re=t.filter(x=>x.status==='red').length;
-  const ov=t.filter(x=>x.deadline&&x.deadline<today&&x.status!=='green').length;
-  const pct=t.length?Math.round(gr/t.length*100):0;
-  document.getElementById('nav-badge-tasks').textContent=(re+ye)||'';
+
+  // Samlet liste af opgaver på tværs af institutioner og medarbejdere, tagget med domæne
+  const all=state.tasks.map(t=>({...t,domain:'inst'})).concat(state.medTasks.map(t=>({...t,domain:'med'})));
+
+  const gr=all.filter(x=>x.status==='green').length,ye=all.filter(x=>x.status==='yellow').length,re=all.filter(x=>x.status==='red').length;
+  const ov=all.filter(x=>x.deadline&&x.deadline<today&&x.status!=='green').length;
+  const pct=all.length?Math.round(gr/all.length*100):0;
+  document.getElementById('nav-badge-tasks').textContent=(state.tasks.filter(x=>x.status!=='green').length)||'';
   document.getElementById('dash-stats').innerHTML=`
-    <div class="stat-card"><div class="stat-lbl">Institutioner</div><div class="stat-val">53</div></div>
-    <div class="stat-card"><div class="stat-lbl">Opgaver i alt</div><div class="stat-val">${t.length}</div></div>
+    <div class="stat-card"><div class="stat-lbl">Institutioner</div><div class="stat-val">${state.insts.length}</div></div>
+    <div class="stat-card"><div class="stat-lbl">Medarbejdere</div><div class="stat-val">${state.medarbejdere.length}</div></div>
+    <div class="stat-card"><div class="stat-lbl">Opgaver i alt</div><div class="stat-val">${all.length}</div></div>
     <div class="stat-card"><div class="stat-lbl">Afsluttet</div><div class="stat-val sv-g">${gr}</div><div class="stat-sub">${pct}%</div></div>
     <div class="stat-card"><div class="stat-lbl">I gang</div><div class="stat-val sv-a">${ye}</div></div>
     <div class="stat-card"><div class="stat-lbl">Ikke påbegyndt</div><div class="stat-val sv-r">${re}</div></div>
     <div class="stat-card"><div class="stat-lbl">Overskredet</div><div class="stat-val sv-r">${ov}</div></div>`;
 
-  // overdue grouped by skabelon
-  const overdueT=t.filter(x=>x.deadline&&x.deadline<today&&x.status!=='green');
+  // Overskredet, grupperet pr. opgavetype på tværs af begge domæner
+  const overdueT=all.filter(x=>x.deadline&&x.deadline<today&&x.status!=='green');
   const odGroups={};
-  overdueT.forEach(x=>{if(!odGroups[x.skabelonId])odGroups[x.skabelonId]=[];odGroups[x.skabelonId].push(x)});
-  document.getElementById('ct-overdue').textContent=Object.keys(odGroups).length||'';
-  document.getElementById('dash-overdue').innerHTML=Object.keys(odGroups).length?
-    Object.entries(odGroups).map(([sid,tasks])=>{
-      const sk=findSkabelon(sid);const gr2=tasks.filter(x=>x.status==='green').length;
-      return`<div class="activity-item cr" onclick="jumpToSkabelon('${sid}')">
+  overdueT.forEach(x=>{const key=x.domain+'_'+x.skabelonId;if(!odGroups[key])odGroups[key]={domain:x.domain,skabelonId:x.skabelonId,tasks:[]};odGroups[key].tasks.push(x)});
+  const odList=Object.values(odGroups).sort((a,b)=>a.tasks.map(x=>x.deadline).sort()[0].localeCompare(b.tasks.map(x=>x.deadline).sort()[0]));
+  document.getElementById('ct-overdue').textContent=odList.length||'';
+  document.getElementById('dash-overdue').innerHTML=odList.length?
+    odList.map(g=>{
+      const sk=findSkabelon(g.skabelonId,g.domain);const gr2=g.tasks.filter(x=>x.status==='green').length;
+      const icon=g.domain==='med'?'👤':'🏫';
+      return`<div class="activity-item cr" onclick="jumpToSkabelon('${g.skabelonId}','${g.domain}')">
         <div class="a-dot r"></div>
-        <div class="a-body"><div><span class="a-who">${esc(sk?sk.item.name:'–')}</span></div>
-        <div class="a-text">${sk?esc(sk.cat.name+' › '+sk.sub.name):''} · ${gr2}/${tasks.length} afsluttet · tidligste: ${tasks.map(x=>x.deadline).sort()[0]}</div></div>
+        <div class="a-body"><div><span class="a-who">${icon} ${sk?esc(sk.item.name):'–'}</span></div>
+        <div class="a-text">${sk?esc(sk.cat.name+' › '+sk.sub.name):''} · ${gr2}/${g.tasks.length} afsluttet · tidligste: ${g.tasks.map(x=>x.deadline).sort()[0]}</div></div>
       </div>`}).join(''):
     '<div style="font-size:12px;color:var(--gray-400);padding:8px 0">Ingen overskredet deadlines 🎉</div>';
 
-  const nearT=t.filter(x=>x.deadline&&x.deadline>=today&&x.deadline<=tomStr&&x.status!=='green').sort((a,b)=>{const ia=instById(a.instId),ib=instById(b.instId);return(ia?ia.nr:9999)-(ib?ib.nr:9999)});
+  // Nær deadline, kombineret og sorteret efter deadline på tværs af begge domæner
+  const nearT=all.filter(x=>x.deadline&&x.deadline>=today&&x.deadline<=tomStr&&x.status!=='green').sort((a,b)=>a.deadline.localeCompare(b.deadline));
   document.getElementById('ct-near').textContent=nearT.length||'';
   document.getElementById('dash-near').innerHTML=nearT.length?
-    nearT.slice(0,6).map(x=>{const sk=findSkabelon(x.skabelonId);const inst=instById(x.instId);return`<div class="activity-item cr" onclick="openEditSingle('${x.id}')">
+    nearT.slice(0,6).map(x=>{
+      const sk=findSkabelon(x.skabelonId,x.domain);
+      const icon=x.domain==='med'?'👤':'🏫';
+      let sub='';
+      if(x.domain==='med'){const m=medById(x.medarbejderId);sub=m?esc(m.navn):'–'}
+      else{const inst=instById(x.instId);sub=inst?('#'+inst.nr+' '+esc(inst.name)):'–'}
+      const clickFn=x.domain==='med'?`openEditMedTask('${x.id}')`:`openEditSingle('${x.id}')`;
+      return`<div class="activity-item cr" onclick="${clickFn}">
       <div class="a-dot a"></div>
-      <div class="a-body"><div><span class="a-who">${esc(sk?sk.item.name:'–')}</span><span class="a-time">${esc(x.deadline)}</span></div>
-      <div class="a-text">${inst?'#'+inst.nr+' ':''}${esc(inst?inst.name:'–')}</div></div>
+      <div class="a-body"><div><span class="a-who">${icon} ${sk?esc(sk.item.name):'–'}</span><span class="a-time">${esc(x.deadline)}</span></div>
+      <div class="a-text">${sub}</div></div>
     </div>`}).join(''):
     '<div style="font-size:12px;color:var(--gray-400);padding:8px 0">Ingen deadlines i dag eller i morgen</div>';
 
@@ -1567,7 +1580,7 @@ function jumpToSkabelon(sid,domain){
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   const pageId=domain==='med'?'page-mtasks':'page-tasks';
   document.getElementById(pageId).classList.add('active');
-  document.getElementById('page-title').textContent=domain==='med'?'Medarbejder-opgaver':'Opgaver';
+  document.getElementById('page-title').textContent='Opgaver';
   expanded['l1_'+sk.cat.id]=true;expanded['l2_'+sk.sub.id]=true;expanded['l3_'+sk.item.id]=true;
   if(domain==='med'){document.getElementById('mtq').value='';renderMedTasks()}
   else{document.getElementById('tq').value='';renderTasks()}
@@ -2072,7 +2085,7 @@ function filterToMed(medId,name){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('page-mtasks').classList.add('active');
-  document.getElementById('page-title').textContent='Medarbejder-opgaver – '+name;
+  document.getElementById('page-title').textContent='Opgaver – '+name;
   document.getElementById('mtq').value=name;renderMedTasks();
 }
 function openNewMedarbejder(){
